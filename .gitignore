@@ -1,0 +1,10 @@
+base/*
+.claude/*
+.agents/*
+.opencode/*
+.env
+jobs/*
+!jobs/.gitkeep
+memory/*
+!memory/.gitkeep
+brand/profile.md
