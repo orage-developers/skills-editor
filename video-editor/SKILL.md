@@ -7,13 +7,16 @@ description: Edit footage and build motion-graphics videos. Covers brand onboard
 
 One skill, many capabilities. Read this file, then load **only** the references the task needs from `references/`. Paths to `scripts/`, `references/` and `templates/` are relative to this skill's folder; workspace paths (`brand/`, `memory/`, `jobs/`) are relative to the project root.
 
-## 0. Gate: run before any task
+## 0. Gate: run at session start, before any task
 
-| Check | If it fails |
+Run `scripts/doctor.sh`, then act on its output in this order:
+
+| Doctor line | Action |
 | --- | --- |
-| `brand/profile.md` exists with no `{{…}}` placeholders | Load `references/brand-onboarding.md` and interview the user first. |
-| `memory/index.md` records a passing doctor run | Run `scripts/doctor.sh`; load `references/environment-setup.md`. |
-| Connections the task needs are verified | Load `references/connections-setup.md`. |
+| `brand-profile` is `warn` | Load `references/brand-onboarding.md`; ask the first round of brand questions now and save answers to `brand/profile.md`. |
+| `gdrive` or another connection is `warn` | After the brand is saved, load `references/connections-setup.md` and ask the user to complete each missing connection; verify it. |
+| A tool is `FAIL` | Load `references/environment-setup.md`; show `scripts/install.sh --dry-run` and ask before installing. |
+| `memory` is `warn` | Create `memory/index.md` from `templates/memory-index.md` with the results. |
 
 Then read `memory/index.md` and the notes it links.
 
