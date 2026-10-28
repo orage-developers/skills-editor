@@ -73,7 +73,13 @@ Duck music under speech with `sidechaincompress` when the voice must stay clear:
 
 ## Loudness: −14 LUFS, true peak < −1 dBTP
 
-Two-pass `loudnorm` for finals:
+Use the script for finals — it applies gain into a peak limiter and re-measures until it lands within ±0.5 LU:
+
+```bash
+scripts/loudness.sh work/draft.mp4 out/final.mp4        # video stream-copied, AAC 192k 48 kHz, +faststart
+```
+
+A plain two-pass `loudnorm` often undershoots on speech (tested: −24 → −15.2 LUFS) because linear mode can't add enough gain without exceeding the true-peak target. It's fine for music-heavy material:
 
 ```bash
 # Pass 1: measure
@@ -83,7 +89,7 @@ ffmpeg -i in.mp4 -af loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=<I>:measured_TP=<T
  -c:v copy -c:a aac -b:a 192k -ar 48000 loud.mp4
 ```
 
-Target TP −1.5 so the result stays below −1 after AAC encoding. `scripts/qa.sh` reports the final values.
+Target TP −1.5 so the result stays below −1 after AAC encoding. `scripts/qa.sh` reports the final values; if it fails loudness, run `scripts/loudness.sh`.
 
 ## Captions
 

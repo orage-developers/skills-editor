@@ -25,7 +25,7 @@ Project initialization, linting, inspection, preview and rendering. Checked agai
 | Word-level transcript | `hyperframes transcribe src.mp4 --language es --json` (whisper.cpp, or Parakeet if installed via `hyperframes models install parakeet`) |
 | Caption sidecar | `hyperframes transcribe src.mp4 --to srt -o captions.srt` |
 | Background removal | `hyperframes remove-background src.mp4 -o speaker.webm` (`.mov` for ProRes 4444, `-b bg.webm` for the background plate) |
-| Narration (Kokoro) | `hyperframes tts script.txt -o voice.wav --voice af_heart --lang es` (`--list` for voices) |
+| Narration (Kokoro) | `HYPERFRAMES_PYTHON="$REEL_PYTHON" hyperframes tts script.txt -o voice.wav --voice ef_dora --lang es` (`--list` for voices; needs `kokoro-onnx` + `soundfile` in that Python) |
 | Beat detection | `hyperframes beats` (writes `beats/<audio>.json` for cutting on the music) |
 | Audio analysis | `hyperframes audio` · `hyperframes normalize-audio` |
 | Website capture | `hyperframes capture <url>` (for launch videos) |

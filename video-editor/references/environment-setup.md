@@ -11,7 +11,7 @@ Install and verify the local toolchain. The standard pipeline renders locally an
 | Chromium / Chrome | Rendering HTML scenes to frames | Hyperframes bundles one; Playwright or system Chrome also work |
 | Hyperframes CLI | Motion-video projects; also local transcribe, remove-background, Kokoro TTS | 0.8 (`npm i -g hyperframes`) — renders need the system FFmpeg |
 | Python | Reel scripts | 3.10 |
-| Reel venv | `faster-whisper`, `onnxruntime`, `numpy`, `opencv-python-headless` | at `$VIDEO_EDITOR_DATA/reel-venv` |
+| Reel venv | `faster-whisper`, `av<18`, `onnxruntime`, `numpy`, `opencv-python-headless`, `kokoro-onnx`, `soundfile` | at `$VIDEO_EDITOR_DATA/reel-venv` |
 | Matting model | Background removal | `rvm_mobilenetv3_fp32.onnx` in `$VIDEO_EDITOR_DATA/models/` |
 | rclone | Google Drive delivery | 1.60 |
 | Git | Fetching this skill and updates | any |
@@ -24,7 +24,7 @@ Install and verify the local toolchain. The standard pipeline renders locally an
    - uses the system package manager (apt, dnf, pacman, zypper or Homebrew) for FFmpeg, Python, rclone and Git;
    - installs Chromium through Playwright (`npx playwright install chromium`);
    - installs the Hyperframes CLI globally with npm;
-   - (re)creates the reel venv, replacing it if its interpreter symlink is broken;
+   - creates the reel venv, recreates it if its interpreter symlink is broken, and repairs it in place if a package is missing or incompatible;
    - downloads the matting model.
    Flags: `--skip-system` (no package manager, no sudo), `--skip-reel`, `--dry-run`.
 4. If `sudo` needs a password you can't enter, give the user the exact command and ask them to run it (in Claude Code they can type `! <command>`).
@@ -42,6 +42,14 @@ Fix: `scripts/install.sh --skip-system` recreates the venv. Then verify:
 ```
 
 Adding an API key does not fix this.
+
+## Known failure: PyAV too new
+
+faster-whisper 1.2 calls `av.open(..., metadata_errors=...)`, which PyAV 18+ rejects: `TypeError: open() got an unexpected keyword argument 'metadata_errors'`. Imports still succeed, so only the doctor's `decode test` catches it. `install.sh` pins `av<18`; rerun it to repair.
+
+## Kokoro narration
+
+`hyperframes tts` runs Kokoro through Python and needs `kokoro-onnx` and `soundfile`. They live in the reel venv; point Hyperframes at it with `HYPERFRAMES_PYTHON="$REEL_PYTHON"` (`scripts/lib.sh` exports this for the bundled scripts).
 
 ## Platform notes
 

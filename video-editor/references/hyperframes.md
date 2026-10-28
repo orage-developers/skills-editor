@@ -27,7 +27,7 @@ Keep footage, images, fonts and audio inside the project. GSAP loads from the CD
 4. **Animate** following `hyperframes-animation.md`. One paused GSAP timeline per composition.
 5. **Check and preview.** Run `hyperframes check --at-transitions` and fix every error. Look at `hyperframes snapshot` frames for the hook (0–1.2 s), each scene change and the last frame.
 6. **Draft render** with `hyperframes render -q draft -o renders/draft-vN.mp4`, run `scripts/qa.sh`, show the user.
-7. **Final render** after approval, normalize audio with FFmpeg if the composition has sound, copy to `jobs/<job>/out/`, deliver.
+7. **Final render** after approval (`-q delivery`), normalize audio with `scripts/loudness.sh` if the composition has sound (output in `jobs/<job>/out/`), `scripts/qa.sh`, deliver.
 
 ## Checklist before showing a draft
 

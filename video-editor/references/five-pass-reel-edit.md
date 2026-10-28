@@ -25,7 +25,7 @@ If it fails, follow `environment-setup.md` → broken reel venv. Don't start a r
 "$REEL_PYTHON" "$VE/scripts/reel/tighten.py" --render src/aroll.mp4 work/p1/tight.mp4 --edl work/p1/edl.json
 ```
 
-- Removes pauses longer than `--max-gap`, filler sounds (default `um,uh,erm,ehm,eh,mm,mmm,hmm`) and any ranges under `"cut"` in the EDL. Add language-specific fillers with `--fillers` only after checking the transcript — words like "like" or "este" are often real words.
+- Removes pauses longer than `--max-gap` (from word gaps and from `silencedetect` on the audio — Whisper often stretches a word over a pause), filler sounds (default `um,uh,erm,ehm,eh,mm,mmm,hmm`) and any ranges under `"cut"` in the EDL. Add language-specific fillers with `--fillers` only after checking the transcript — words like "like" or "este" are often real words.
 - Drop retakes and false starts by deleting their entries from `"keep"`; reorder entries to move a line.
 - Hook check: the first spoken words must state the point. If not, move the strongest line to the start (edit `edl.json` order) and confirm with the user.
 - Preview: `tight.mp4` + the tightened transcript. **Approve.**
@@ -39,6 +39,7 @@ If it fails, follow `environment-setup.md` → broken reel venv. Don't start a r
 - Produces the speaker with an alpha channel (ProRes 4444; use `.webm` for VP9 alpha that loads directly in Hyperframes) using the local RVM ONNX model, plus an H.264 preview over a brand color.
 - Composite on a brand background or keep the original background for later "behind the speaker" effects — keep both the alpha file and `tight.mp4`.
 - Preview: a composite over a solid brand color; check hair edges, hands and fast motion. **Approve.**
+- Speed: ~1.5 frames/s on CPU at 1080×1920 (a 30 s reel ≈ 10 min). Run it in the background, and use `hyperframes remove-background --device cuda` when a GPU is available.
 - Skip this pass when no effect needs it and the user agrees.
 
 ## Pass 3 — Word-timed captions
@@ -62,8 +63,8 @@ If it fails, follow `environment-setup.md` → broken reel venv. Don't start a r
 - Dialogue: `highpass=f=80`, light de-noise (`afftdn=nf=-25`), gentle compression.
 - Music bed from `brand/assets/music/` under the voice with sidechain ducking (`ffmpeg.md`), music ending on the CTA.
 - Optional whooshes / pops on major motion beats, quiet (−20 dB under voice).
-- Loudness two-pass to −14 LUFS, TP −1.5.
-- Final export with the reel preset → `"$VE/scripts/qa.sh" out/<slug>-final.mp4` → user approval → `"$VE/scripts/deliver.sh" out/<slug>-final.mp4`.
+- Export the mix with the reel preset to `work/p5/mix.mp4`, then `"$VE/scripts/loudness.sh" work/p5/mix.mp4 out/<slug>-final.mp4` (−14 LUFS, TP < −1).
+- `"$VE/scripts/qa.sh" out/<slug>-final.mp4` → user approval → `"$VE/scripts/deliver.sh" out/<slug>-final.mp4`.
 
 ## Notes
 

@@ -76,6 +76,7 @@ Then ask for your first video: *"Make a 30 s 9:16 reel from this clip: …"*.
     │   ├── doctor.sh            # Checks brand profile, memory, tools, reel venv and connections
     │   ├── install.sh           # Installs system packages, Hyperframes, reel venv and matting model
     │   ├── link.sh              # Links the skill into .claude/, .agents/ and .opencode/
+    │   ├── loudness.sh          # Normalizes audio to −14 LUFS with true peak below −1 dBTP
     │   ├── qa.sh                # Checks an export (codec, size, fps, loudness, fast-start) and writes review frames
     │   ├── deliver.sh           # Uploads to Drive, verifies the size, prints the link
     │   ├── lib.sh               # Shared helpers (.env loading, paths)
@@ -161,7 +162,7 @@ FFmpeg, Chromium, GSAP, local Hyperframes, local Whisper transcription and ONNX 
 - FFmpeg and FFprobe (Hyperframes renders need the system FFmpeg too)
 - Node.js ≥ 24 with npm/npx, and the Hyperframes CLI (`npm install -g hyperframes`)
 - Chromium or Chrome (Hyperframes bundles one; `npx playwright install chromium` also works)
-- Python ≥ 3.10 with venv support, and a dedicated reel venv at `~/.local/share/video-editor/reel-venv`: `faster-whisper`, `onnxruntime`, `numpy`, `opencv-python-headless`
+- Python ≥ 3.10 with venv support, and a dedicated reel venv at `~/.local/share/video-editor/reel-venv`: `faster-whisper`, `av<18`, `onnxruntime`, `numpy`, `opencv-python-headless`, `kokoro-onnx`, `soundfile`
 - The RVM matting model `rvm_mobilenetv3_fp32.onnx` (downloaded by `install.sh`)
 - `rclone`, Git and curl
 

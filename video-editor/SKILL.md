@@ -59,7 +59,8 @@ Then read `memory/index.md` and the notes it links.
 Run before declaring any export done:
 
 ```bash
-scripts/qa.sh jobs/<job>/out/<file>.mp4            # format, loudness, fast-start
+scripts/loudness.sh jobs/<job>/work/<mix>.mp4 jobs/<job>/out/<file>.mp4   # −14 LUFS, TP < −1 dBTP
+scripts/qa.sh jobs/<job>/out/<file>.mp4            # format, size, fps, loudness, fast-start, review frames
 scripts/deliver.sh jobs/<job>/out/<file>.mp4       # upload, verify size, print link
 ```
 

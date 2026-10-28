@@ -34,10 +34,10 @@ Scale proportionally for 15 s (2 features) or 25 s (4 features or longer proof).
 ## Narration with `--voice`
 
 - Write the script to the beat timing (~2.5 words/s, ≈ 45–50 words for 20 s).
-- Generate it locally with Kokoro: `hyperframes tts work/script.txt -o work/voice.wav --voice <id> --lang <es|en-us|…>` (`hyperframes tts --list` shows voices). The first run downloads the model.
+- Generate it locally with Kokoro: `HYPERFRAMES_PYTHON="$REEL_PYTHON" hyperframes tts work/script.txt -o work/voice.wav --voice <id> --lang <es|en-us|…>` (`hyperframes tts --list` shows voices; Spanish: `ef_dora`). Kokoro needs `kokoro-onnx` and `soundfile`, which `install.sh` puts in the reel venv; the first run downloads the voice model.
 - Transcribe the result (`hyperframes transcribe work/voice.wav --json` or `scripts/reel/transcribe.py`) and retime beats to the actual word timestamps.
 - If Kokoro isn't available, ask the user for a recording or offer `brag-slim.md`. Use ElevenLabs only if the user explicitly asks for it and the key is set.
 
 ## Delivery
 
-Draft → approval → final render → loudness to −14 LUFS → `scripts/qa.sh` → `scripts/deliver.sh`. For landing pages, also offer a muted, looping WebM/MP4 version without the CTA card.
+Draft → approval → final render → `scripts/loudness.sh` → `scripts/qa.sh` → `scripts/deliver.sh`. For landing pages, also offer a muted, looping WebM/MP4 version without the CTA card.
