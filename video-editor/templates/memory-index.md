@@ -1,15 +1,32 @@
 # Memory index
 
+_Created: {{DATE}} · Maintained by the Video Editor agent with `video-editor/scripts/workspace.py`._
+
 ## Setup status
 
 | Item | Status | Checked |
 | --- | --- | --- |
-| Doctor (`video-editor/scripts/doctor.sh`) | {{pass / fail: details}} | {{YYYY-MM-DD}} |
-| Brand profile (`brand/profile.md`) | {{confirmed / draft}} | {{YYYY-MM-DD}} |
-| AI provider | {{tool session / ANTHROPIC_API_KEY / …}} | {{YYYY-MM-DD}} |
-| Google Drive (`gdrive:`) | {{verified / missing}} | {{YYYY-MM-DD}} |
-| HeyGen / Hyperframes cloud | {{verified / skipped}} | {{YYYY-MM-DD}} |
-| ElevenLabs | {{verified / skipped}} | {{YYYY-MM-DD}} |
+| Doctor (`video-editor/scripts/doctor.sh`) | not checked | {{DATE}} |
+| Brand profile (`brand/profile.md`) | missing | {{DATE}} |
+| AI provider | not checked | {{DATE}} |
+| Google Drive (`gdrive:`) | not checked | {{DATE}} |
+| HeyGen / Hyperframes cloud | not asked | {{DATE}} |
+| ElevenLabs | not asked | {{DATE}} |
+
+## Workspace
+
+| Folder | Contents |
+| --- | --- |
+| [`brand/`](../brand/) | Brand profile ([profile.md](../brand/profile.md)) |
+| [`brand/assets/logo/`](../brand/assets/logo/) | Logo files |
+| [`brand/assets/fonts/`](../brand/assets/fonts/) | Brand fonts |
+| [`brand/assets/music/`](../brand/assets/music/) | Licensed music beds |
+| [`memory/important/`](important/) | Dated notes on decisions and corrections |
+| [`jobs/`](../jobs/) | One folder per job: `src/`, `work/`, `out/` |
+
+## Jobs
+
+<!-- workspace.py job adds one line per job; workspace.py status updates it. -->
 
 ## Proven pipelines
 
@@ -17,7 +34,7 @@
 
 ## Important notes
 
-- _Link each `memory/important/YYYY-MM-DD-<slug>.md` here with a one-line summary._
+<!-- workspace.py note adds one line per note. -->
 
 ## Misc
 
