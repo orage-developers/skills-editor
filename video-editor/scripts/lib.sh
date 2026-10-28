@@ -32,7 +32,23 @@ REEL_PYTHON="${REEL_PYTHON:-$REEL_VENV/bin/python}"
 MATTE_MODEL="${MATTE_MODEL:-$VIDEO_EDITOR_DATA/models/rvm_mobilenetv3_fp32.onnx}"
 GDRIVE_REMOTE="${GDRIVE_REMOTE:-gdrive}"
 GDRIVE_FOLDER="${GDRIVE_FOLDER:-Video Editor}"
-export VIDEO_EDITOR_DATA REEL_VENV REEL_PYTHON MATTE_MODEL GDRIVE_REMOTE GDRIVE_FOLDER
+# Hyperframes looks here for kokoro-onnx when running `hyperframes tts`.
+HYPERFRAMES_PYTHON="${HYPERFRAMES_PYTHON:-$REEL_PYTHON}"
+export VIDEO_EDITOR_DATA REEL_VENV REEL_PYTHON MATTE_MODEL GDRIVE_REMOTE GDRIVE_FOLDER HYPERFRAMES_PYTHON
+
+# Imports everything the reel scripts need and decodes a short WAV through faster-whisper,
+# which catches incompatible PyAV versions that a plain import misses.
+REEL_SMOKE_TEST='
+import os, tempfile, wave
+import numpy, cv2, onnxruntime
+from faster_whisper.audio import decode_audio
+fd, p = tempfile.mkstemp(suffix=".wav"); os.close(fd)
+w = wave.open(p, "wb"); w.setnchannels(1); w.setsampwidth(2); w.setframerate(16000); w.writeframes(b"\0\0" * 1600); w.close()
+try:
+    decode_audio(p)
+finally:
+    os.unlink(p)
+'
 
 have() { command -v "$1" >/dev/null 2>&1; }
 

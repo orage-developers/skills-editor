@@ -90,6 +90,10 @@ else
     if "$REEL_PYTHON" -c "import $mod" 2>/dev/null; then ok "  $mod" ""
     else miss "$REQUIRE_REEL" "  $mod" "not importable in reel venv"; fi
   done
+  if err="$("$REEL_PYTHON" -c "$REEL_SMOKE_TEST" 2>&1)"; then ok "  decode test" "faster-whisper decodes audio"
+  else miss "$REQUIRE_REEL" "  decode test" "$(tail -1 <<<"$err") — run install.sh --skip-system"; fi
+  if "$REEL_PYTHON" -c "import kokoro_onnx, soundfile" 2>/dev/null; then ok "  kokoro" "hyperframes tts ready"
+  else warn "  kokoro" "kokoro-onnx missing; hyperframes tts (brag --voice) won't work — run install.sh"; fi
 fi
 if [ -s "$MATTE_MODEL" ]; then ok matte-model "$(basename "$MATTE_MODEL")"
 else miss "$REQUIRE_REEL" matte-model "missing at $MATTE_MODEL; run install.sh"; fi

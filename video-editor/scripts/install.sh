@@ -25,7 +25,9 @@ for arg in "$@"; do
 done
 
 MODEL_URL="https://github.com/PeterL1n/RobustVideoMatting/releases/download/v1.0.0/rvm_mobilenetv3_fp32.onnx"
-REEL_PACKAGES=(faster-whisper onnxruntime numpy opencv-python-headless)
+# av<18: faster-whisper 1.2 calls av.open(metadata_errors=...), which PyAV 18+ rejects.
+# kokoro-onnx + soundfile: Kokoro narration for `hyperframes tts` (HYPERFRAMES_PYTHON points at this venv).
+REEL_PACKAGES=(faster-whisper "av<18" onnxruntime numpy opencv-python-headless kokoro-onnx soundfile)
 STATUS=0
 USER_CMD=""
 
@@ -135,7 +137,8 @@ if [ "$SKIP_REEL" = 0 ]; then
     STATUS=1
   else
     reel_ok=0
-    if [ -x "$REEL_PYTHON" ] && "$REEL_PYTHON" -c "import faster_whisper, onnxruntime, numpy, cv2" 2>/dev/null; then
+    if [ -x "$REEL_PYTHON" ] && "$REEL_PYTHON" -c "$REEL_SMOKE_TEST" 2>/dev/null &&
+       "$REEL_PYTHON" -c "import kokoro_onnx, soundfile" 2>/dev/null; then
       reel_ok=1
     fi
     if [ "$reel_ok" = 1 ]; then
@@ -148,9 +151,14 @@ if [ "$SKIP_REEL" = 0 ]; then
         echo "    interpreter symlink is broken; recreating the venv"
       fi
       run mkdir -p "$VIDEO_EDITOR_DATA"
-      run "$PY" -m venv --clear "$REEL_VENV" &&
-        run "$REEL_VENV/bin/python" -m pip install --quiet --upgrade pip &&
-        run "$REEL_VENV/bin/python" -m pip install --quiet "${REEL_PACKAGES[@]}"
+      if [ -x "$REEL_PYTHON" ]; then
+        # Existing venv with missing or incompatible packages: repair in place.
+        run "$REEL_PYTHON" -m pip install --quiet "${REEL_PACKAGES[@]}"
+      else
+        run "$PY" -m venv --clear "$REEL_VENV" &&
+          run "$REEL_VENV/bin/python" -m pip install --quiet --upgrade pip &&
+          run "$REEL_VENV/bin/python" -m pip install --quiet "${REEL_PACKAGES[@]}"
+      fi
     fi
   fi
 
