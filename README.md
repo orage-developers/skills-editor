@@ -1,118 +1,125 @@
 # Scout Agents — Video Editor
 
-Plantilla para crear agentes de **edición de video y motion graphics** que comparten el mismo conocimiento y las mismas skills, y que funcionan en cualquier herramienta compatible con `AGENTS.md` / `SKILL.md`: Claude Code, Codex, OpenCode y similares.
+A template for creating **video editing and motion graphics agents** that share the same knowledge and skills. Everything ships as a single skill, `video-editor/`, that works in any tool supporting `AGENTS.md` / `SKILL.md`: Claude Code, Codex, OpenCode and similar.
 
-El agente:
+The agent:
 
-1. **Conoce la marca antes de editar.** En la primera sesión pregunta por la marca del usuario (nombre, tono, colores, tipografías, logo, plataformas, referencias) y guarda la respuesta en `brand/profile.md`.
-2. **Prepara su propio entorno.** Verifica e instala FFmpeg, Node, Chromium, Python y las dependencias de transcripción y recorte.
-3. **Pide las sesiones y conexiones que necesita.** Solicita solo las credenciales requeridas para la tarea (proveedor de IA, Google Drive) y deja las opcionales (HeyGen, ElevenLabs) para cuando se usen.
-4. **Edita con un pipeline probado.** Usa FFmpeg para footage real y Hyperframes (HTML/CSS/JS + GSAP renderizado en Chromium) para motion; siempre entrega un borrador antes del final.
+1. **Learns the brand before editing.** On its first session it asks about the user's brand (name, tone, colors, typography, logo, platforms, references) and saves the answers to `brand/profile.md`.
+2. **Prepares its own environment.** It checks for and installs FFmpeg, Node, Chromium, Python and the transcription and matting dependencies.
+3. **Requests only the sessions and connections it needs.** It asks for the credentials the task requires (AI provider, Google Drive) and leaves optional ones (HeyGen, ElevenLabs) until a task uses them.
+4. **Edits with a proven pipeline.** FFmpeg for real footage, Hyperframes (HTML/CSS/JS + GSAP rendered through Chromium) for motion, and always a draft before the final.
 
-## Inicio rápido
+## Quick start
 
-1. Clona este repo y abre una sesión de tu agente en la raíz.
-2. Copia el prompt de [`prompts/bootstrap.md`](prompts/bootstrap.md) y pégalo en Claude, Codex, OpenCode, etc.
-3. Responde las preguntas de marca y autoriza las conexiones que te pida.
-4. Pide tu primer video: *"Haz un reel 9:16 de 30 s con este clip: …"*.
+1. Clone this repo and open an agent session at its root.
+2. Copy the prompt from [`video-editor/bootstrap-prompt.md`](video-editor/bootstrap-prompt.md) and paste it into Claude, Codex, OpenCode, etc.
+3. Answer the brand questions and authorize the connections it asks for.
+4. Ask for your first video: *"Make a 30 s 9:16 reel from this clip: …"*.
 
-## Estructura
+## Structure
 
 ```
 .
-├── README.md               # Este archivo
-├── AGENTS.md               # Instrucciones del agente: rol, pipeline, reglas, credenciales
-├── CLAUDE.md               # Importa AGENTS.md para Claude Code
-├── .env.example            # Nombres de credenciales (nunca valores)
-├── prompts/
-│   └── bootstrap.md        # Prompt para pegar: instala requisitos, pide marca y conexiones
-├── skills/                 # Fuente canónica de skills (una carpeta por skill con SKILL.md)
-├── scripts/
-│   ├── install.sh          # Instala dependencias del sistema y del entorno de reels
-│   ├── doctor.sh           # Verifica herramientas, entornos y credenciales
-│   └── link-skills.sh      # Enlaza skills/ en .claude/, .agents/ y .opencode/
-├── brand/
-│   ├── profile.template.md # Plantilla del perfil de marca
-│   └── profile.md          # Perfil real de la marca (generado, ignorado por git)
-├── memory/                 # Memoria del agente: index.md, misc.md, important/ (ignorada por git)
-├── jobs/                   # Trabajos: jobs/<job>/{src,work,out} (ignorado por git)
-└── base/
-    └── knowledge.md        # Investigación fuente (ignorada por git)
+├── README.md                    # This file
+├── AGENTS.md                    # Agent instructions: role, pipeline, rules, credentials
+└── video-editor/                # The skill — single source of truth
+    ├── SKILL.md                 # Entry point: onboarding gate and routing to references
+    ├── bootstrap-prompt.md      # Prompt to paste: installs requirements, asks for brand and connections
+    ├── references/              # One file per capability (see below)
+    ├── scripts/
+    │   ├── install.sh           # Installs system dependencies and the reel Python environment
+    │   ├── doctor.sh            # Checks tools, environments and credentials
+    │   └── link.sh              # Links the skill into .claude/, .agents/ and .opencode/
+    └── templates/
+        ├── brand-profile.md     # Brand profile template
+        ├── memory-index.md      # Memory index template
+        └── env.example          # Credential names (never values)
 ```
 
-`skills/` es la única fuente de verdad. Las carpetas de cada herramienta (`.claude/skills`, `.agents/skills`, `.opencode/skill`) se generan con `scripts/link-skills.sh` y están en `.gitignore`.
+The tool-specific skill folders (`.claude/skills`, `.agents/skills`, `.opencode/skill`) are generated by `video-editor/scripts/link.sh` and ignored by git.
 
-## Skills
+### Created at runtime (ignored by git)
 
-### Edición (heredadas del agente Video Editor)
-
-| Skill | Qué hace |
+| Path | Contents |
 | --- | --- |
-| `hyperframes` | Punto de entrada para proyectos de motion en HTML/CSS/JS. |
-| `hyperframes-core` | Composición, timing, clips, tracks y render determinista. |
-| `hyperframes-animation` | Reglas de animación, blueprints de escena, transiciones y adaptadores (GSAP). |
-| `hyperframes-creative` | Dirección visual, tipografía, paletas, narración y ritmo. |
-| `hyperframes-cli` | Init, lint, inspect, preview y render; render en la nube opcional. |
-| `ffmpeg` | Cortes, conversión, escalado, compresión, audio y exportación. |
-| `video-editing` | Flujo general de footage crudo a edición ensamblada. |
-| `five-pass-reel-edit` | Reels de cabeza parlante en cinco pasadas con revisión entre cada una. |
-| `reel-motion-effects` | 17 efectos sincronizados por palabra (gráficas, checklists, órbitas, fondos). |
-| `brag` | Videos de lanzamiento de 15–25 s con Hyperframes; narración opcional con Kokoro. |
-| `brag-slim` | Versión ligera de `brag` sin voz, solo con herramientas locales. |
-| `self-improvement` | Registra errores, correcciones y mejores enfoques para futuros trabajos. |
+| `brand/profile.md` | The user's brand profile, filled in during onboarding. |
+| `memory/` | `index.md`, `misc.md` and dated notes under `important/`. |
+| `jobs/<job>/` | `src/`, `work/` and `out/` for each job. |
+| `.env` | Credential values. |
 
-### Arranque (nuevas)
+## Capabilities
 
-| Skill | Qué hace |
+Each former standalone skill is now a reference inside `video-editor/references/`. `SKILL.md` loads only the ones a task needs.
+
+### Editing
+
+| Reference | What it covers |
 | --- | --- |
-| `brand-onboarding` | Entrevista de marca en la primera sesión; crea y actualiza `brand/profile.md`. |
-| `environment-setup` | Detecta el sistema, instala requisitos y repara el entorno Python de reels. |
-| `connections-setup` | Pide y verifica sesiones: proveedor de IA, Google Drive (rclone) y servicios opcionales. |
+| `hyperframes` | Entry point for HTML/CSS/JS motion-video projects. |
+| `hyperframes-core` | Composition structure, timing, clips, tracks and deterministic rendering. |
+| `hyperframes-animation` | Animation rules, scene blueprints, transitions and runtime adapters such as GSAP. |
+| `hyperframes-creative` | Visual direction, typography, palettes, narration planning and scene pacing. |
+| `hyperframes-cli` | Init, lint, inspect, preview and render; optional cloud rendering. |
+| `ffmpeg` | Cutting, conversion, scaling, compression, audio extraction and export prep. |
+| `video-editing` | General workflow from raw footage to an assembled edit. |
+| `five-pass-reel-edit` | Talking-head reels in five passes with review between each. |
+| `reel-motion-effects` | 17 word-timed effects: charts, checklists, orbiting elements, graphics behind the speaker. |
+| `brag` | 15–25 s product/app/website launch videos with Hyperframes; optional Kokoro narration. |
+| `brag-slim` | Lighter launch-video workflow with local tools only; no voiceover. |
+| `self-improvement` | Records mistakes, corrections and better approaches for future jobs. |
 
-## Pipeline de edición
+### Bootstrap
 
-1. Leer `memory/index.md`, `brand/profile.md` y las notas de pipelines probados.
-2. Elegir formato: **9:16** para redes, **16:9** para landing y YouTube largo.
-3. Footage real → FFmpeg. Motion → Hyperframes + GSAP → Chromium → MP4.
-4. Reels de cabeza parlante → cinco pasadas: transcribir y recortar, quitar fondo, subtítulos por palabra, motion graphics, mezcla de sonido. Preview y aprobación entre pasadas.
-5. Borrador antes del final: hook en ≤ 1.2 s, título en el primer frame, subtítulos, cortes limpios entre palabras.
-6. QA con FFprobe y revisión visual. Objetivo del reel: 1080×1920, 30 fps, H.264/AAC, −14 LUFS integrados, true peak < −1 dB, `faststart`.
-7. Guardar en `jobs/<job>/out/`, subir a `gdrive:<Carpeta>/<YYYY-MM-DD>/`, verificar tamaño y devolver el enlace.
+| Reference | What it covers |
+| --- | --- |
+| `brand-onboarding` | First-session brand interview; creates and updates `brand/profile.md`. |
+| `environment-setup` | Detects the OS, installs requirements and repairs the reel Python environment. |
+| `connections-setup` | Requests and verifies sessions: AI provider, Google Drive (rclone) and optional services. |
 
-Fuera de alcance: estrategia, copywriting amplio, calendarización y publicación en redes.
+## Editing pipeline
 
-## Credenciales
+1. Read `memory/index.md`, `brand/profile.md` and notes on proven pipelines.
+2. Pick the aspect ratio: **9:16** for social, **16:9** for landing pages and long-form YouTube.
+3. Real footage → FFmpeg. Motion → Hyperframes + GSAP → Chromium → MP4.
+4. Talking-head reels → five passes: transcribe and tighten, remove the background, word-timed captions, motion graphics, sound mix. Preview and approval between passes.
+5. Draft before final: hook within 1.2 s, title on the first frame, captions, clean word boundaries.
+6. QA with FFprobe and visual review. Reel target: 1080×1920, 30 fps, H.264/AAC, −14 LUFS integrated, true peak below −1 dB, MP4 fast-start.
+7. Save to `jobs/<job>/out/`, upload to `gdrive:<Folder>/<YYYY-MM-DD>/`, verify the uploaded size and return the link.
 
-Los valores van en `.env` o en el gestor de credenciales de la herramienta, **nunca** en prompts ni en git.
+Out of scope: strategy, broader copywriting, scheduling and social publishing.
 
-| Nivel | Credencial | Cuándo |
+## Credentials
+
+Values go in `.env` or the tool's credential store — **never** in prompts or git.
+
+| Level | Credential | When |
 | --- | --- | --- |
-| Requerida | Proveedor de IA (`ANTHROPIC_API_KEY` o la sesión de tu herramienta) | Planificación y decisiones de edición. |
-| Requerida | Google Drive OAuth vía `rclone` (remote `gdrive:`) | Leer assets y entregar videos. |
-| Alternativa | `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`, login de Codex | Solo si eliges ese proveedor. |
-| Opcional | `HEYGEN_API_KEY` / `HYPERFRAMES_API_KEY` / `HEYGEN_ACCESS_TOKEN` | Solo para `hyperframes cloud render`. |
-| Opcional | `ELEVENLABS_API_KEY` | Solo para voz con ElevenLabs pedida explícitamente. |
-| Opcional | Cuentas de AWS o Google Cloud | Solo para render en Lambda o Cloud Run. |
+| Required | AI provider (`ANTHROPIC_API_KEY` or your tool's own session) | Planning, tool use and editing decisions. |
+| Required | Google Drive OAuth via `rclone` (remote `gdrive:`) | Reading assets and delivering videos. |
+| Alternative | `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`, Codex login | Only if you choose that provider. |
+| Optional | `HEYGEN_API_KEY` / `HYPERFRAMES_API_KEY` / `HEYGEN_ACCESS_TOKEN` | Only for `hyperframes cloud render`. |
+| Optional | `ELEVENLABS_API_KEY` | Only for an explicitly requested ElevenLabs voiceover. |
+| Optional | AWS or Google Cloud accounts | Only for Lambda or Cloud Run rendering. |
 
-FFmpeg, Chromium, GSAP, Hyperframes local, la transcripción Whisper local y el matting ONNX **no** requieren API keys, aunque sí red para descargar paquetes y modelos.
+FFmpeg, Chromium, GSAP, local Hyperframes, local Whisper transcription and ONNX matting need **no** API keys, though they need network access to download packages and models.
 
-## Requisitos del sistema
+## System requirements
 
-- FFmpeg y FFprobe
-- Node.js ≥ 24 con npm/npx
-- Chromium (o Chrome) para Playwright/Hyperframes
-- Python ≥ 3.10 con un venv dedicado para reels: `faster-whisper`, `onnxruntime`, `numpy`, `opencv-python`
-- `rclone` y Git
+- FFmpeg and FFprobe
+- Node.js ≥ 24 with npm/npx
+- Chromium (or Chrome) for Playwright/Hyperframes
+- Python ≥ 3.10 with a dedicated reel venv: `faster-whisper`, `onnxruntime`, `numpy`, `opencv-python`
+- `rclone` and Git
 
-`scripts/doctor.sh` verifica todo lo anterior. Una API key no arregla un venv roto: si el doctor reporta fallas en transcripción o matting, ejecuta `scripts/install.sh`.
+`video-editor/scripts/doctor.sh` checks all of the above. An API key won't fix a broken venv: if the doctor reports transcription or matting failures, run `video-editor/scripts/install.sh`.
 
-## Crear un agente nuevo
+## Creating a new agent
 
-Cada agente es una copia de este repo con su propia marca y memoria:
+Each agent is a copy of this repo with its own brand and memory:
 
 ```bash
-git clone <este-repo> mi-agente && cd mi-agente
-./scripts/link-skills.sh
+git clone <this-repo> my-agent && cd my-agent
+./video-editor/scripts/link.sh
 ```
 
-Luego pega el prompt de `prompts/bootstrap.md`. El conocimiento y las skills son compartidos; `brand/profile.md`, `memory/` y `jobs/` son propios de cada instancia.
+Then paste the prompt from `video-editor/bootstrap-prompt.md`. Knowledge and skills are shared; `brand/`, `memory/` and `jobs/` belong to each instance.

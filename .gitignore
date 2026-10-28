@@ -3,8 +3,6 @@ base/*
 .agents/*
 .opencode/*
 .env
-jobs/*
-!jobs/.gitkeep
-memory/*
-!memory/.gitkeep
-brand/profile.md
+jobs/
+memory/
+brand/
