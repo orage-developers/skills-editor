@@ -6,18 +6,15 @@ A template for creating **video editing and motion graphics agents** that share 
 
 Pick one. All three end with the agent asking about your brand, saving it to `brand/profile.md`, and asking for any missing connections.
 
-### A. Let an agent install it (recommended)
+### A. Ask your agent (recommended)
 
-Open Claude Code, Codex, OpenCode or any agent that can run shell commands in the folder where you want the agent to work, and paste:
+Open Claude Code, Codex, OpenCode or any agent that can run shell commands, in the folder where the video agent should work, and say:
 
 ```text
-Install the Video Editor agent from https://github.com/orage-developers/skills-editor into this folder:
-clone it, copy AGENTS.md, CLAUDE.md and the video-editor/ folder here, run ./video-editor/scripts/link.sh,
-then follow video-editor/bootstrap-prompt.md step by step: check and install requirements, ask me about my brand
-and save it, and ask me for every missing connection.
+Install this: https://github.com/orage-developers/skills-editor
 ```
 
-For a fully guided setup, paste the longer prompt in [`video-editor/bootstrap-prompt.md`](video-editor/bootstrap-prompt.md) instead.
+The agent reads [For AI agents](#for-ai-agents-installing-this-repo) below and does the rest. For a step-by-step guided setup, paste [`video-editor/bootstrap-prompt.md`](video-editor/bootstrap-prompt.md) instead.
 
 ### B. Clone this repo and run the scripts
 
@@ -39,6 +36,15 @@ npx skills add orage-developers/skills-editor --skill video-editor --global   # 
 ```
 
 This installs the skill without `AGENTS.md`, so the agent loads it only when you ask for video work. To get the brand interview at session start, also copy [`AGENTS.md`](AGENTS.md) into your project, or paste [`video-editor/bootstrap-prompt.md`](video-editor/bootstrap-prompt.md) once.
+
+### For AI agents installing this repo
+
+If a user asked you to install this repository, do the following without asking for confirmation, except before overwriting an existing `AGENTS.md` or `CLAUDE.md`:
+
+1. **Get the files.** If the current folder already contains `video-editor/SKILL.md`, skip this step. Otherwise `git clone --depth 1 https://github.com/orage-developers/skills-editor.git .video-editor-src`, copy `AGENTS.md`, `CLAUDE.md` and `video-editor/` from it into the current folder, add the `.gitignore` entries from it if a `.gitignore` exists (or copy the file), and delete `.video-editor-src`.
+2. **Register the skill and workspace.** Run `./video-editor/scripts/link.sh`, then `./video-editor/scripts/workspace.py init`.
+3. **Take over as the Video Editor agent.** Read `AGENTS.md` and follow its *Session start* section now: run the doctor, interview the user about their brand and save it, ask for every missing connection, and show `install.sh --dry-run` before installing requirements (ask first; if `sudo` needs a password, give the user the command to run).
+4. **Report** a short checklist (environment, brand, AI provider, Google Drive, optional services) and ask for the first video.
 
 ### Where each tool looks for the skill
 
@@ -76,6 +82,7 @@ Then ask for your first video: *"Make a 30 s 9:16 reel from this clip: …"*.
     │   ├── doctor.sh            # Checks brand profile, memory, tools, reel venv and connections
     │   ├── install.sh           # Installs system packages, Hyperframes, reel venv and matting model
     │   ├── link.sh              # Links the skill into .claude/, .agents/ and .opencode/
+    │   ├── workspace.py         # Creates brand/, memory/, jobs/ and indexes jobs, folders and notes in memory
     │   ├── loudness.sh          # Normalizes audio to −14 LUFS with true peak below −1 dBTP
     │   ├── qa.sh                # Checks an export (codec, size, fps, loudness, fast-start) and writes review frames
     │   ├── deliver.sh           # Uploads to Drive, verifies the size, prints the link
@@ -94,11 +101,14 @@ The tool-specific skill folders (`.claude/skills`, `.agents/skills`, `.opencode/
 
 ### Created at runtime (ignored by git)
 
+The agent creates these itself with `workspace.py` and keeps them listed in `memory/index.md`.
+
 | Path | Contents |
 | --- | --- |
 | `brand/profile.md` | The user's brand profile, filled in during onboarding. |
-| `memory/` | `index.md`, `misc.md` and dated notes under `important/`. |
-| `jobs/<job>/` | `src/`, `work/` and `out/` for each job. |
+| `brand/assets/` | `logo/`, `fonts/`, `music/` and any folder added with `workspace.py folder`. |
+| `memory/` | `index.md` (setup status, workspace map, jobs, notes), `misc.md` and dated notes under `important/`. |
+| `jobs/<date>-<slug>/` | `brief.md`, `src/`, `work/` and `out/` for each job, created with `workspace.py job`. |
 | `.env` | Credential values. |
 
 ## Capabilities
