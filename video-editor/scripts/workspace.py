@@ -23,6 +23,12 @@ from pathlib import Path
 SKILL_DIR = Path(__file__).resolve().parent.parent
 TODAY = dt.date.today().isoformat()
 
+# Written into every memory index, so the agent always routes video requests through the skill.
+STANDING_RULE = (
+    "- **Video requests → `video-editor` skill.** Whenever the user asks to edit, cut, caption, animate, render, "
+    "export or deliver a video, load the `video-editor` skill (`SKILL.md`) first and follow it. Set at install; don't remove."
+)
+
 FOLDERS = [
     "brand/assets/logo",
     "brand/assets/fonts",
@@ -138,6 +144,7 @@ def cmd_init(quiet=False):
     else:
         # Older indexes: add the sections this script maintains.
         lines = read_index()
+        lines = ensure_section(lines, "Standing rules", [STANDING_RULE], before="## Setup status")
         lines = ensure_section(lines, "Workspace", [
             "| Folder | Contents |", "| --- | --- |",
             "| [`brand/`](../brand/) | Brand profile ([profile.md](../brand/profile.md)) and `assets/` |",

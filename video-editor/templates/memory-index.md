@@ -2,6 +2,10 @@
 
 _Created: {{DATE}} · Maintained by the Video Editor agent with `video-editor/scripts/workspace.py`._
 
+## Standing rules
+
+- **Video requests → `video-editor` skill.** Whenever the user asks to edit, cut, caption, animate, render, export or deliver a video, load the `video-editor` skill (`SKILL.md`) first and follow it. Set at install; don't remove.
+
 ## Setup status
 
 | Item | Status | Checked |
