@@ -5,31 +5,27 @@ description: Edit footage and build motion-graphics videos. Covers brand onboard
 
 # Video Editor
 
-## Just installed? Do this now, in the same turn
+## 0. Gate: run before replying, every session
 
-If the project root's `AGENTS.md` has no `<!-- video-editor:begin` block, this skill was just installed (by `git clone`, `npx skills add`, a skill installer, or by hand). Before replying to the user:
+Paths to `scripts/`, `references/` and `templates/` are relative to this skill's folder (wherever it was installed — the project, `.agents/skills/`, `~/.codex/skills/`, …); workspace paths (`brand/`, `memory/`, `jobs/`) are relative to the project root. Call scripts through `bash` / `python3` — some installers drop the executable bit.
 
-1. From the project root, run `<this skill's folder>/scripts/setup.sh`. It writes `AGENTS.md` and `CLAUDE.md` with the right paths, creates `brand/`, `memory/` and `jobs/` with the memory index, adds `.env` and `jobs/` to `.gitignore`, and links the skill for Claude Code, Codex and OpenCode. Don't ask before running it.
-2. Read the new `AGENTS.md` and follow its **Session start** right away: run the doctor, start the brand interview, then ask for missing connections and show what `install.sh --dry-run` would install.
+**Step 1 — always:** `bash <skill>/scripts/doctor.sh` from the project root. Its first line says whether the project is set up.
 
-Tell the user in one line that the skill is installed, then go straight into the brand questions.
-
----
-
-One skill, many capabilities. Read this file, then load **only** the references the task needs from `references/`. Paths to `scripts/`, `references/` and `templates/` are relative to this skill's folder; workspace paths (`brand/`, `memory/`, `jobs/`) are relative to the project root.
-
-## 0. Gate: run at session start, before any task
-
-Run `scripts/workspace.py init` (creates the workspace folders and `memory/index.md` on its own), then `scripts/doctor.sh`, and act on the doctor's output in this order:
+**Step 2 — act on the doctor, top to bottom, before answering the user's request:**
 
 | Doctor line | Action |
 | --- | --- |
-| `brand-profile` is `warn` | Load `references/brand-onboarding.md`; ask the first round of brand questions now and save answers to `brand/profile.md`. |
-| `gdrive` or another connection is `warn` | After the brand is saved, load `references/connections-setup.md` and ask the user to complete each missing connection; verify it. |
-| A tool is `FAIL` | Load `references/environment-setup.md`; show `scripts/install.sh --dry-run` and ask before installing. |
-| `workspace` is `warn` | Run `scripts/workspace.py init`. |
+| `setup` is `warn` (skill just installed, no Video Editor block in `AGENTS.md`) | Run the exact `bash …/setup.sh` command the doctor prints. Don't ask first and don't create files by hand: it writes `AGENTS.md`/`CLAUDE.md`, creates `brand/`, `memory/`, `jobs/` and the memory index, and links the skill. Tell the user in one line that the video editor is installed, then continue down this table. |
+| `workspace` is `warn` | Run the `python3 …/workspace.py init` command the doctor prints. |
+| `brand-profile` is `warn` | Load `references/brand-onboarding.md`; ask the first round of brand questions **in this reply** and save answers to `brand/profile.md`. The user's request waits until the brand is saved, unless they say to skip. |
+| `gdrive` or another connection is `warn` | After the brand is saved, load `references/connections-setup.md`, ask for each missing connection and whether they want optional services; verify each one. |
+| A tool is `FAIL` | Load `references/environment-setup.md`; show `bash scripts/install.sh --dry-run` and ask before installing. |
 
-Then read `memory/index.md` and the notes it links.
+Then read `memory/index.md` and the notes and jobs it links.
+
+---
+
+One skill, many capabilities: load **only** the references the task needs from `references/`.
 
 ## 1. Route the task
 

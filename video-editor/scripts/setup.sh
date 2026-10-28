@@ -21,6 +21,8 @@ for arg in "$@"; do
 done
 
 ROOT="$PROJECT_ROOT"
+# Some installers drop the executable bit; restore it so scripts can be called directly.
+chmod +x "$SKILL_DIR"/scripts/*.sh "$SKILL_DIR"/scripts/*.py "$SKILL_DIR"/scripts/reel/*.py 2>/dev/null || true
 # Path the instructions use to reach the skill: relative when it lives inside the project.
 case "$SKILL_DIR/" in
   "$ROOT"/*) SKILL_REF="$(python3 -c 'import os, sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))' "$SKILL_DIR" "$ROOT")" ;;
@@ -68,11 +70,11 @@ done
 
 # ---------------------------------------------------------------- workspace + links
 python3 "$SKILL_DIR/scripts/workspace.py" init
-[ "$LINK" = 1 ] && "$SKILL_DIR/scripts/link.sh" --project "$ROOT"
+[ "$LINK" = 1 ] && bash "$SKILL_DIR/scripts/link.sh" --project "$ROOT"
 
 cat <<EOF
 
 setup: done. Next — as the agent, now:
-  1. $SKILL_REF/scripts/doctor.sh
+  1. bash $SKILL_REF/scripts/doctor.sh
   2. follow the "Session start" section of AGENTS.md: brand interview, missing connections, environment.
 EOF

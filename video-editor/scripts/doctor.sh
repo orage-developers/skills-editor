@@ -31,6 +31,13 @@ fail() { printf '  FAIL  %-22s %s\n' "$1" "${2:-}"; FAILS=$((FAILS + 1)); }
 miss() { if [ "$1" = 1 ]; then fail "$2" "$3"; else warn "$2" "$3"; fi; }
 
 echo "Workspace ($PROJECT_ROOT)"
+NEXT=()
+if grep -q 'video-editor:begin' "$PROJECT_ROOT/AGENTS.md" 2>/dev/null; then
+  ok setup "AGENTS.md has the Video Editor block"
+else
+  warn setup "project not set up for the Video Editor agent"
+  NEXT+=("bash \"$SKILL_DIR/scripts/setup.sh\"")
+fi
 profile="$PROJECT_ROOT/brand/profile.md"
 if [ ! -f "$profile" ]; then
   warn brand-profile "missing — run the brand interview (references/brand-onboarding.md)"
@@ -46,7 +53,8 @@ for d in brand/assets memory/important jobs; do [ -d "$PROJECT_ROOT/$d" ] || mis
 if [ -z "$missing_dirs" ] && [ -f "$PROJECT_ROOT/memory/index.md" ]; then
   ok workspace "brand/, memory/, jobs/ and memory/index.md ($(grep -c '^- \[' "$PROJECT_ROOT/memory/index.md") indexed item(s))"
 else
-  warn workspace "missing${missing_dirs:- memory/index.md} — run scripts/workspace.py init"
+  warn workspace "missing${missing_dirs:- memory/index.md}"
+  [ ${#NEXT[@]} -gt 0 ] || NEXT+=("python3 \"$SKILL_DIR/scripts/workspace.py\" init")
 fi
 
 echo "Tools"
@@ -122,8 +130,9 @@ for var in HEYGEN_API_KEY HYPERFRAMES_API_KEY HEYGEN_ACCESS_TOKEN ELEVENLABS_API
 done
 
 echo
+for cmd in "${NEXT[@]}"; do echo "NEXT: $cmd"; done
 if [ "$FAILS" -gt 0 ]; then
-  echo "doctor: $FAILS required check(s) failed, $WARNS warning(s). Run scripts/install.sh --dry-run to see the fix."
+  echo "doctor: $FAILS required check(s) failed, $WARNS warning(s). See the fix: bash \"$SKILL_DIR/scripts/install.sh\" --dry-run"
   exit 1
 fi
 echo "doctor: ready ($WARNS warning(s))"
