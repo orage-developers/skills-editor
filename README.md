@@ -2,41 +2,94 @@
 
 A template for creating **video editing and motion graphics agents** that share the same knowledge and skills. Everything ships as a single skill, `video-editor/`, that works in any tool supporting `AGENTS.md` / `SKILL.md`: Claude Code, Codex, OpenCode and similar.
 
-The agent:
+## Install
 
-1. **Learns the brand before editing.** On its first session it asks about the user's brand (name, tone, colors, typography, logo, platforms, references) and saves the answers to `brand/profile.md`.
-2. **Prepares its own environment.** It checks for and installs FFmpeg, Node, Chromium, Python and the transcription and matting dependencies.
-3. **Requests only the sessions and connections it needs.** It asks for the credentials the task requires (AI provider, Google Drive) and leaves optional ones (HeyGen, ElevenLabs) until a task uses them.
-4. **Edits with a proven pipeline.** FFmpeg for real footage, Hyperframes (HTML/CSS/JS + GSAP rendered through Chromium) for motion, and always a draft before the final.
+Pick one. All three end with the agent asking about your brand, saving it to `brand/profile.md`, and asking for any missing connections.
 
-## Quick start
+### A. Let an agent install it (recommended)
 
-1. Clone this repo and open an agent session at its root.
-2. Copy the prompt from [`video-editor/bootstrap-prompt.md`](video-editor/bootstrap-prompt.md) and paste it into Claude, Codex, OpenCode, etc.
-3. Answer the brand questions and authorize the connections it asks for.
-4. Ask for your first video: *"Make a 30 s 9:16 reel from this clip: …"*.
+Open Claude Code, Codex, OpenCode or any agent that can run shell commands in the folder where you want the agent to work, and paste:
+
+```text
+Install the Video Editor agent from https://github.com/orage-developers/skills-editor into this folder:
+clone it, copy AGENTS.md, CLAUDE.md and the video-editor/ folder here, run ./video-editor/scripts/link.sh,
+then follow video-editor/bootstrap-prompt.md step by step: check and install requirements, ask me about my brand
+and save it, and ask me for every missing connection.
+```
+
+For a fully guided setup, paste the longer prompt in [`video-editor/bootstrap-prompt.md`](video-editor/bootstrap-prompt.md) instead.
+
+### B. Clone this repo and run the scripts
+
+```bash
+git clone https://github.com/orage-developers/skills-editor.git my-video-agent
+cd my-video-agent
+./video-editor/scripts/link.sh            # expose the skill to Claude Code, Codex and OpenCode
+./video-editor/scripts/doctor.sh          # see what's missing
+./video-editor/scripts/install.sh --dry-run && ./video-editor/scripts/install.sh
+```
+
+Then start your agent in that folder (`claude`, `codex` or `opencode`) and say hi. `AGENTS.md` (read by Codex and OpenCode, and by Claude Code through `CLAUDE.md`) makes it start with the brand interview and the connection checks.
+
+### C. Install only the skill with a skills manager
+
+```bash
+npx skills add orage-developers/skills-editor --skill video-editor            # this project
+npx skills add orage-developers/skills-editor --skill video-editor --global   # every project
+```
+
+This installs the skill without `AGENTS.md`, so the agent loads it only when you ask for video work. To get the brand interview at session start, also copy [`AGENTS.md`](AGENTS.md) into your project, or paste [`video-editor/bootstrap-prompt.md`](video-editor/bootstrap-prompt.md) once.
+
+### Where each tool looks for the skill
+
+`video-editor/scripts/link.sh` creates these links (`--global` for the user-level column, `--copy` to copy instead of symlink, `--unlink` to remove):
+
+| Tool | Instructions file | Project skill folder | User skill folder |
+| --- | --- | --- | --- |
+| Claude Code | `CLAUDE.md` → `@AGENTS.md` | `.claude/skills/video-editor` | `~/.claude/skills/video-editor` |
+| Codex | `AGENTS.md` | `.agents/skills/video-editor` | `~/.agents/skills/video-editor` |
+| OpenCode | `AGENTS.md` | `.opencode/skills/video-editor` | `~/.config/opencode/skills/video-editor` |
+
+Other agents: point them at `AGENTS.md` and `video-editor/SKILL.md`.
+
+## What the agent does
+
+1. **Learns the brand first.** On the first message of a session it runs `doctor.sh`; if there is no confirmed `brand/profile.md` it interviews you in short rounds (name, audience, tone, colors, fonts, logo, platforms, caption style, references, rules) and saves the answers.
+2. **Asks for missing connections.** Google Drive through rclone (for delivery), the AI provider if your tool doesn't already supply one, and optional services (HeyGen cloud rendering, ElevenLabs) only if you want them. It never asks you to paste secrets into the chat.
+3. **Prepares its environment.** It shows what `install.sh` will install and asks before installing FFmpeg, rclone, Python venv support, the Hyperframes CLI, the reel venv and the matting model.
+4. **Edits with a proven pipeline.** FFmpeg for real footage, Hyperframes (HTML/CSS/JS + GSAP rendered through Chromium) for motion, a draft before every final, QA and Drive delivery.
+
+Then ask for your first video: *"Make a 30 s 9:16 reel from this clip: …"*.
 
 ## Structure
 
 ```
 .
 ├── README.md                    # This file
-├── AGENTS.md                    # Agent instructions: role, pipeline, rules, credentials
+├── AGENTS.md                    # Agent instructions: session start, pipeline, rules, credentials
+├── CLAUDE.md                    # Imports AGENTS.md for Claude Code
 └── video-editor/                # The skill — single source of truth
-    ├── SKILL.md                 # Entry point: onboarding gate and routing to references
+    ├── SKILL.md                 # Entry point: session gate and routing to references
     ├── bootstrap-prompt.md      # Prompt to paste: installs requirements, asks for brand and connections
     ├── references/              # One file per capability (see below)
     ├── scripts/
-    │   ├── install.sh           # Installs system dependencies and the reel Python environment
-    │   ├── doctor.sh            # Checks tools, environments and credentials
-    │   └── link.sh              # Links the skill into .claude/, .agents/ and .opencode/
+    │   ├── doctor.sh            # Checks brand profile, memory, tools, reel venv and connections
+    │   ├── install.sh           # Installs system packages, Hyperframes, reel venv and matting model
+    │   ├── link.sh              # Links the skill into .claude/, .agents/ and .opencode/
+    │   ├── qa.sh                # Checks an export (codec, size, fps, loudness, fast-start) and writes review frames
+    │   ├── deliver.sh           # Uploads to Drive, verifies the size, prints the link
+    │   ├── lib.sh               # Shared helpers (.env loading, paths)
+    │   └── reel/
+    │       ├── transcribe.py    # Word timestamps with local faster-whisper
+    │       ├── tighten.py       # Removes pauses and fillers via an editable EDL, renders the cut
+    │       └── matte.py         # Background removal with the local RVM ONNX model
     └── templates/
         ├── brand-profile.md     # Brand profile template
         ├── memory-index.md      # Memory index template
         └── env.example          # Credential names (never values)
 ```
 
-The tool-specific skill folders (`.claude/skills`, `.agents/skills`, `.opencode/skill`) are generated by `video-editor/scripts/link.sh` and ignored by git.
+The tool-specific skill folders (`.claude/skills`, `.agents/skills`, `.opencode/skills`) are generated by `link.sh` and ignored by git.
 
 ### Created at runtime (ignored by git)
 
@@ -59,7 +112,7 @@ Each former standalone skill is now a reference inside `video-editor/references/
 | `hyperframes-core` | Composition structure, timing, clips, tracks and deterministic rendering. |
 | `hyperframes-animation` | Animation rules, scene blueprints, transitions and runtime adapters such as GSAP. |
 | `hyperframes-creative` | Visual direction, typography, palettes, narration planning and scene pacing. |
-| `hyperframes-cli` | Init, lint, inspect, preview and render; optional cloud rendering. |
+| `hyperframes-cli` | Init, check, snapshot, preview and render; local transcribe, background removal and Kokoro TTS; optional cloud rendering. |
 | `ffmpeg` | Cutting, conversion, scaling, compression, audio extraction and export prep. |
 | `video-editing` | General workflow from raw footage to an assembled edit. |
 | `five-pass-reel-edit` | Talking-head reels in five passes with review between each. |
@@ -72,7 +125,7 @@ Each former standalone skill is now a reference inside `video-editor/references/
 
 | Reference | What it covers |
 | --- | --- |
-| `brand-onboarding` | First-session brand interview; creates and updates `brand/profile.md`. |
+| `brand-onboarding` | Session-start brand interview; creates and updates `brand/profile.md`. |
 | `environment-setup` | Detects the OS, installs requirements and repairs the reel Python environment. |
 | `connections-setup` | Requests and verifies sessions: AI provider, Google Drive (rclone) and optional services. |
 
@@ -105,11 +158,12 @@ FFmpeg, Chromium, GSAP, local Hyperframes, local Whisper transcription and ONNX 
 
 ## System requirements
 
-- FFmpeg and FFprobe
-- Node.js ≥ 24 with npm/npx
-- Chromium (or Chrome) for Playwright/Hyperframes
-- Python ≥ 3.10 with a dedicated reel venv: `faster-whisper`, `onnxruntime`, `numpy`, `opencv-python`
-- `rclone` and Git
+- FFmpeg and FFprobe (Hyperframes renders need the system FFmpeg too)
+- Node.js ≥ 24 with npm/npx, and the Hyperframes CLI (`npm install -g hyperframes`)
+- Chromium or Chrome (Hyperframes bundles one; `npx playwright install chromium` also works)
+- Python ≥ 3.10 with venv support, and a dedicated reel venv at `~/.local/share/video-editor/reel-venv`: `faster-whisper`, `onnxruntime`, `numpy`, `opencv-python-headless`
+- The RVM matting model `rvm_mobilenetv3_fp32.onnx` (downloaded by `install.sh`)
+- `rclone`, Git and curl
 
 `video-editor/scripts/doctor.sh` checks all of the above. An API key won't fix a broken venv: if the doctor reports transcription or matting failures, run `video-editor/scripts/install.sh`.
 
@@ -118,7 +172,7 @@ FFmpeg, Chromium, GSAP, local Hyperframes, local Whisper transcription and ONNX 
 Each agent is a copy of this repo with its own brand and memory:
 
 ```bash
-git clone <this-repo> my-agent && cd my-agent
+git clone https://github.com/orage-developers/skills-editor.git my-agent && cd my-agent
 ./video-editor/scripts/link.sh
 ```
 
