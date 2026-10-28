@@ -1,36 +1,61 @@
 # Hyperframes CLI
 
-Project initialization, linting, inspection, preview and rendering. `scripts/install.sh` installs the CLI globally; otherwise use `npx hyperframes`. Command names below are the documented workflow; confirm flags with `hyperframes --help` and `hyperframes <command> --help` before first use on a machine, and note differences in `memory/misc.md`.
+Project initialization, linting, inspection, preview and rendering. Checked against v0.8.x. `scripts/install.sh` installs the CLI globally (`npm install -g hyperframes`); otherwise prefix commands with `npx hyperframes`. Run `hyperframes <command> --help` when a flag below fails — the CLI changes quickly.
 
-## Commands
+## Everyday commands
 
-| Step | Command | Notes |
-| --- | --- | --- |
-| Scaffold | `hyperframes init <dir>` | Creates the project and a starter composition. Run inside `jobs/<job>/work/`. |
-| Lint | `hyperframes lint` | Run after every structural change. Fix all errors before rendering. |
-| Inspect | `hyperframes inspect` | Lists compositions, clips, tracks and durations — use it to check timing against the beat map. |
-| Preview | `hyperframes preview` | Local browser preview with scrubbing. Share the URL with the user if they're on the same machine. |
-| Render | `hyperframes render` | Local render through Chromium to MP4. Write to `renders/draft-vN.mp4` or `renders/final.mp4`. |
-| Cloud render | `hyperframes cloud render` | Managed rendering on HeyGen. Paid; ask first. |
+| Step | Command |
+| --- | --- |
+| Scaffold | `hyperframes init <name> --resolution portrait --non-interactive` (add `--video src.mp4 --language es` to import footage and transcribe it) |
+| Docs | `hyperframes docs data-attributes` · `compositions` · `gsap` · `rendering` · `troubleshooting` |
+| Lint | `hyperframes lint` |
+| Full gate | `hyperframes check --at-transitions` — lint, runtime errors, layout overflow, motion and WCAG contrast in one pass. Add `--caption-zone "x0=0;y0=.62;x1=1;y1=.78"` for 9:16 captions. |
+| Timing | `hyperframes timeline` · `hyperframes compositions` · `hyperframes info` |
+| Frames | `hyperframes snapshot` (PNG key frames for visual review) · `hyperframes inspect` (layout across the timeline) |
+| Preview | `hyperframes preview` (studio with scrubbing) |
+| Render draft | `hyperframes render -q draft -o renders/draft-v1.mp4` |
+| Render final | `hyperframes render -q delivery -f 30 -o renders/final.mp4` |
+| Alpha overlay | `hyperframes render --format mov -o renders/overlay.mov` (ProRes 4444 with alpha) |
+| Environment | `hyperframes doctor` · `hyperframes browser` (manage the render Chrome) |
 
-## Local render tips
+## Media helpers (local, no API key)
 
-- Render drafts at full resolution but consider a lower quality preset if the CLI offers one; render finals at the highest quality.
-- If Chromium isn't found, run `npx playwright install chromium` or point the CLI at the system Chrome (see `--help` for the browser path option or environment variable).
-- Long renders: run in the background and check progress rather than blocking the session.
-- After rendering, always run `scripts/qa.sh`. If loudness is off, fix it with FFmpeg (`ffmpeg.md` → loudness) instead of re-rendering.
+| Need | Command |
+| --- | --- |
+| Word-level transcript | `hyperframes transcribe src.mp4 --language es --json` (whisper.cpp, or Parakeet if installed via `hyperframes models install parakeet`) |
+| Caption sidecar | `hyperframes transcribe src.mp4 --to srt -o captions.srt` |
+| Background removal | `hyperframes remove-background src.mp4 -o speaker.webm` (`.mov` for ProRes 4444, `-b bg.webm` for the background plate) |
+| Narration (Kokoro) | `hyperframes tts script.txt -o voice.wav --voice af_heart --lang es` (`--list` for voices) |
+| Beat detection | `hyperframes beats` (writes `beats/<audio>.json` for cutting on the music) |
+| Audio analysis | `hyperframes audio` · `hyperframes normalize-audio` |
+| Website capture | `hyperframes capture <url>` (for launch videos) |
 
-## Cloud rendering (optional)
+These are the fallback when the reel venv (`scripts/reel/*.py`) is broken, and the default for `brag`.
 
-Use only when the user chooses it (slow local machine, very long render, batch jobs). Credentials, any one of:
+## Render tips
 
-- `HEYGEN_API_KEY`
-- `HYPERFRAMES_API_KEY`
-- `HEYGEN_ACCESS_TOKEN`
-- a saved HeyGen OAuth login through the CLI
+- Local rendering uses bundled Chromium (Puppeteer) and the **system FFmpeg** — FFmpeg must be installed.
+- `-q draft` for review, `-q delivery` for finals. `-w 4` workers is usually best.
+- Use `--video-frame-format png` for screen recordings and saturated UI colors.
+- Long renders: run in the background and check progress instead of blocking the session.
+- After rendering, always run `scripts/qa.sh`. Fix loudness with FFmpeg (`ffmpeg.md`) rather than re-rendering.
 
-Cloud credits are billed separately from AI model usage. Confirm the cost model with the user before the first cloud render.
+## Official Hyperframes skills (optional)
+
+`hyperframes skills` installs the upstream HyperFrames and GSAP skills into every supported AI tool; `hyperframes skills check` / `update` keep them current. They complement this skill with deeper authoring rules. `init` also installs missing core skills unless you pass `--skip-skills`.
+
+## Cloud rendering (optional, paid)
+
+`hyperframes cloud render` renders on HeyGen instead of locally. Ask first; credits are billed separately from AI model usage.
+
+- Sign in: `hyperframes auth login` (OAuth) or `hyperframes auth login --api-key`; or set `HEYGEN_API_KEY`, `HYPERFRAMES_API_KEY` or `HEYGEN_ACCESS_TOKEN`.
+- Check: `hyperframes auth status`.
+- Manage renders: `hyperframes cloud list|get|delete`.
 
 ## AWS Lambda / Google Cloud Run (optional)
 
-The Hyperframes references describe self-hosted rendering on Lambda or Cloud Run. Adopt them only when the user deliberately asks; they need provider accounts, deployment and their own credentials. They are not required for the local pipeline.
+`hyperframes lambda` and `hyperframes cloudrun` deploy distributed rendering. Adopt only when the user deliberately asks; they need provider accounts and their own credentials, and are not required for the local pipeline.
+
+## Telemetry
+
+The CLI collects anonymous usage data. If the brand profile or user asks for no telemetry: `hyperframes telemetry disable`.

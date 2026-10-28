@@ -8,8 +8,8 @@ Install and verify the local toolchain. The standard pipeline renders locally an
 | --- | --- | --- |
 | FFmpeg + FFprobe | Cutting, encoding, loudness, QA | 5.x with `libx264`, `aac`, `loudnorm` |
 | Node.js + npm/npx | Hyperframes CLI, Playwright | 24 |
-| Chromium / Chrome | Rendering HTML scenes to frames | Playwright-managed or system |
-| Hyperframes CLI | Motion-video projects | latest (`npx hyperframes`) |
+| Chromium / Chrome | Rendering HTML scenes to frames | Hyperframes bundles one; Playwright or system Chrome also work |
+| Hyperframes CLI | Motion-video projects; also local transcribe, remove-background, Kokoro TTS | 0.8 (`npm i -g hyperframes`) — renders need the system FFmpeg |
 | Python | Reel scripts | 3.10 |
 | Reel venv | `faster-whisper`, `onnxruntime`, `numpy`, `opencv-python-headless` | at `$VIDEO_EDITOR_DATA/reel-venv` |
 | Matting model | Background removal | `rvm_mobilenetv3_fp32.onnx` in `$VIDEO_EDITOR_DATA/models/` |

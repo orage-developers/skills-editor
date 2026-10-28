@@ -44,10 +44,18 @@ const words = gsap.utils.toArray("#title .w");
 tl.from(words, { y: 60, opacity: 0, duration: 0.45, ease: "power3.out", stagger: 0.06 }, BEATS.hook)
   .to(words, { y: -40, opacity: 0, duration: 0.25, ease: "power2.in", stagger: 0.03 }, BEATS.problem - 0.3);
 
-// Number count-up (deterministic: tweened object, rendered on update)
-const n = { v: 0 };
-tl.to(n, { v: 87, duration: 1.2, ease: "power2.out",
-  onUpdate: () => (document.querySelector("#stat").textContent = Math.round(n.v) + "%") }, BEATS.stat);
+// Number count-up with supported properties only: pre-render the steps as spans,
+// then flip visibility with set() — deterministic at any seek position.
+const steps = gsap.utils.toArray("#stat .step");          // <span class="step">0%</span> … <span class="step">87%</span>
+steps.forEach((el, i) => {
+  const t = BEATS.stat + 1.2 * (1 - Math.pow(1 - i / (steps.length - 1), 2)); // ease-out spacing
+  tl.set(steps, { visibility: "hidden" }, t).set(el, { visibility: "visible" }, t);
+});
+
+// Bar grows from the baseline (transform-origin: bottom in CSS)
+tl.from(".bar", { scaleY: 0, duration: 0.6, ease: "power3.out", stagger: 0.08 }, BEATS.chart);
 ```
 
 Split text into `<span class="w">` elements in the HTML (or with a deterministic helper at load), not with a paid plugin that may not be installed.
+
+Stick to the supported subset in `hyperframes-core.md`. Before using `onUpdate`, SVG stroke tweens or text tweens, prove them with `hyperframes check` and a `hyperframes snapshot` at several timestamps.

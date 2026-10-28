@@ -7,10 +7,10 @@
 | # | Effect | Trigger | Duration | Layer | Build notes |
 | --- | --- | --- | --- | --- | --- |
 | 1 | **Keyword pop** | A key term | 0.8–1.5 s | Front | Big word scales 0.92 → 1, accent color, exits up. |
-| 2 | **Number counter** | A number or percentage | 1.2–2 s | Front | Count up with a tweened object; suffix (%/x/$) static. |
+| 2 | **Number counter** | A number or percentage | 1.2–2 s | Front | Pre-rendered step spans flipped with `set` (see `hyperframes-animation.md`); suffix static. |
 | 3 | **Bar chart** | Comparison of 2–5 values | 2–3 s | Behind or front | Bars grow from baseline with stagger 0.08 s; label after bar lands. |
-| 4 | **Line chart** | Growth / trend | 2–3 s | Behind | SVG path drawn with `strokeDashoffset`; end dot pulses once. |
-| 5 | **Donut chart** | Share / portion | 1.5–2.5 s | Front | Arc tween on `strokeDasharray`; number in the center. |
+| 4 | **Line chart** | Growth / trend | 2–3 s | Behind | SVG line inside a mask `div` whose `width` tweens left → right; end dot scales in. |
+| 5 | **Donut chart** | Share / portion | 1.5–2.5 s | Front | Static `conic-gradient` ring revealed by a rotating half-mask (`rotation`); number in the center. |
 | 6 | **Checklist** | "First… second…", steps | 0.6 s per item | Front | Items slide in; check mark draws on each spoken item. |
 | 7 | **Orbiting icons** | Tools, features, integrations | 2–4 s | Behind | 3–6 icons on an ellipse around the head; rotate slowly, scale in with stagger. |
 | 8 | **Title behind speaker** | Topic statement | 1.5–3 s | Behind | Huge text between background and alpha speaker; needs pass 2 matte. |
@@ -32,6 +32,8 @@
 - Data effects show real numbers the speaker says. Don't invent figures; ask if the script is vague.
 - Use brand tokens for every color; charts use primary, secondary and accent in that order.
 - Keep each effect's code in its own `<div class="clip fx-N">` with its own beat constant so it can be retimed or removed independently.
+- Layer with CSS `z-index`: background 0, behind-speaker effects 10, speaker alpha 20, front effects 30, captions 40.
+- Validate with `hyperframes check --at-transitions` and snapshot each effect's start, middle and end.
 
 ## Picking effects
 

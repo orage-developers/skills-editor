@@ -1,62 +1,78 @@
 # Hyperframes core
 
-Composition structure, timing, clips, tracks and deterministic rendering. The CLI's `lint` command is the authority on the current schema; if anything below disagrees with it or with the scaffold that `init` generates, follow the CLI and note the difference in `memory/misc.md`.
+Composition structure, timing, clips, tracks and deterministic rendering. Checked against Hyperframes CLI v0.8.x. The CLI is the authority: `hyperframes docs <topic>` (topics: `data-attributes`, `compositions`, `gsap`, `rendering`, `examples`, `troubleshooting`) and `hyperframes check` win over this file. Note any difference in `memory/misc.md`.
 
 ## Composition
 
-A composition is an HTML root element that declares its size and an id. Clips are child elements with timing attributes. Animation lives in one paused GSAP timeline registered under the composition id.
+A composition is an HTML document with a root element carrying `data-composition-id`, `data-width` and `data-height`. Timed elements carry `data-start` / `data-duration` and `class="clip"`. Animation lives in one paused GSAP timeline registered under the composition id.
 
 ```html
-<div id="stage" data-composition-id="main" data-start="0" data-width="1080" data-height="1920">
+<div id="root" data-composition-id="root" data-width="1080" data-height="1920">
 
-  <video id="aroll" data-start="0" data-duration="12" data-track-index="0"
-         src="assets/aroll.mp4" muted playsinline></video>
+  <video id="aroll" class="clip" data-start="0" data-duration="12" data-media-start="3.5"
+         data-has-audio="true" src="assets/aroll.mp4" playsinline></video>
 
-  <div id="title" class="clip" data-start="0" data-duration="2.5" data-track-index="1">
+  <div id="title" class="clip" data-start="0" data-duration="2.5" style="z-index: 10">
     <h1>Ship faster</h1>
   </div>
 
-  <audio id="music" data-start="0" data-duration="12" data-track-index="2"
-         data-volume="0.25" src="assets/music.mp3"></audio>
+  <audio id="music" class="clip" data-start="0" data-duration="12"
+         data-volume="0.25" data-fade-out="1" src="assets/music.mp3"></audio>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
 <script>
   const tl = gsap.timeline({ paused: true });
   tl.from("#title h1", { y: 80, opacity: 0, duration: 0.5, ease: "power3.out" }, 0);
   window.__timelines = window.__timelines || {};
-  window.__timelines["main"] = tl;
+  window.__timelines["root"] = tl;
 </script>
 ```
 
+Scaffold with `hyperframes init <name> --resolution portrait --non-interactive` rather than writing this by hand; the scaffold has the current boilerplate.
+
+## Attributes
+
+| Attribute | Meaning |
+| --- | --- |
+| `data-composition-id` | Required on the root; key for `window.__timelines`. |
+| `data-width`, `data-height` | Canvas size in pixels. |
+| `data-start`, `data-duration` | Clip window in seconds on the composition clock. |
+| `data-media-start` | Trim point inside the media file (seconds). |
+| `data-volume` | Gain: 1 = 0 dB, 0 = silent, up to 3.98 (+12 dB). |
+| `data-fade-in`, `data-fade-out` | Linear audio fades at the clip edges (seconds). |
+| `data-has-audio="true"` | Keep a video's sound. Use `muted` on silent footage. |
+| `data-composition-src` | Embed a nested composition (`compositions/intro.html`). |
+| `data-track-index` | Studio timeline lane, **display only**. |
+
+**Layer order is CSS `z-index`**, not `data-track-index`. Footage low, graphics above, captions on top.
+
 ## Timing model
 
-- `data-start` and `data-duration` are in seconds on the composition clock. A clip is visible only inside its window.
-- `data-track-index` orders layers: higher tracks draw above lower ones. Keep footage on track 0, graphics above, audio on its own tracks.
-- Timeline positions are absolute composition seconds. Place tweens with the position parameter (`tl.to(el, {...}, 3.2)`) rather than chaining long sequences, so retiming one beat doesn't shift everything after it.
-- Keep a single beat map in a `const BEATS = { hook: 0, problem: 1.2, … }` object at the top of the script and reference it everywhere.
+- Place tweens with absolute positions (`tl.to(el, vars, 3.2)`), not long chains, so retiming one beat doesn't shift everything after it.
+- Keep one beat map at the top of the script — `const BEATS = { hook: 0, problem: 1.2, … }` — and reference it everywhere.
+- Split long videos into nested compositions (one per scene) with `data-composition-src`; per-instance values go in `data-variable-values` (see `hyperframes docs compositions`).
 
-## Media
+## GSAP subset
 
-- `<video>` elements are `muted`; route sound through `<audio>` elements so the renderer can mix it.
-- Trim source video with FFmpeg first rather than seeking deep into long files.
-- Use constant-frame-rate sources (`ffmpeg -i in.mp4 -r 30 -vsync cfr …`) to avoid drift.
+Hyperframes drives a paused timeline. Use `set`, `to`, `from`, `fromTo` on `opacity`, `x`, `y`, `scale`, `scaleX`, `scaleY`, `rotation`, `width`, `height`, `visibility`. For anything else (SVG stroke drawing, `onUpdate` counters, text changes) run `hyperframes check` and look at `hyperframes snapshot` frames before relying on it.
 
 ## Determinism rules
 
 The renderer captures frames by seeking the timeline. Anything that depends on wall-clock time breaks the render.
 
-- No `Date.now()`, `performance.now()`, `setTimeout`, `setInterval` or `requestAnimationFrame` loops for animation.
+- No `Date.now()`, `setTimeout`, `setInterval` or `requestAnimationFrame` animation loops.
 - No `Math.random()` without a fixed seed; precompute random values.
-- No CSS `transition` or `@keyframes` unless the CLI documents an adapter for them — drive motion from the GSAP timeline.
-- No network requests at render time: fonts, images, data and scripts are local files.
-- Wait for fonts: load them with `@font-face` from `assets/fonts/` and avoid layout that depends on fallback metrics.
-- Same input, same output: re-render a draft and compare a few frames if you suspect nondeterminism.
+- No CSS `transition` / `@keyframes` for motion — drive it from the timeline.
+- Keep assets in the project. GSAP from the CDN is the documented default; vendor it to `assets/` if renders must work offline.
+- Load brand fonts with `@font-face` from `assets/fonts/` (`hyperframes-localize-fonts` can pull web fonts local).
+- For production finals where exact reproducibility matters, `hyperframes render --docker`.
 
 ## Sizes
 
-| Format | Width × height |
-| --- | --- |
-| 9:16 reel | 1080 × 1920 |
-| 16:9 | 1920 × 1080 |
-| 1:1 | 1080 × 1080 |
-| 4:5 | 1080 × 1350 |
+| Format | Width × height | `init --resolution` |
+| --- | --- | --- |
+| 9:16 reel | 1080 × 1920 | `portrait` |
+| 16:9 | 1920 × 1080 | `landscape` |
+| 1:1 | 1080 × 1080 | `square` |
+| 4:5 | 1080 × 1350 | set `data-width` / `data-height` by hand |

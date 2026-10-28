@@ -7,7 +7,7 @@ Short product, app or website launch videos, 15–25 s, built with Hyperframes. 
 Ask for whatever is missing:
 
 - product name, one-line value proposition and 3 key features;
-- URL or screenshots / screen recordings (if only a URL: capture screenshots with Playwright at 1440×900 and mobile 390×844);
+- URL or screenshots / screen recordings (if only a URL: `hyperframes capture <url>`, or Playwright screenshots at 1440×900 and mobile 390×844);
 - CTA (URL, "Try it free", launch date) and logo;
 - format: 16:9 (landing page, X, LinkedIn) or 9:16 (Reels, TikTok, Shorts);
 - voice: none, Kokoro narration (`--voice`), or a supplied recording.
@@ -34,8 +34,8 @@ Scale proportionally for 15 s (2 features) or 25 s (4 features or longer proof).
 ## Narration with `--voice`
 
 - Write the script to the beat timing (~2.5 words/s, ≈ 45–50 words for 20 s).
-- Generate it with Hyperframes' Kokoro text-to-speech. Check `hyperframes --help` for the exact command and voices on this machine; the first run downloads the voice model.
-- Transcribe the result (`scripts/reel/transcribe.py`) and retime beats to the actual word timestamps.
+- Generate it locally with Kokoro: `hyperframes tts work/script.txt -o work/voice.wav --voice <id> --lang <es|en-us|…>` (`hyperframes tts --list` shows voices). The first run downloads the model.
+- Transcribe the result (`hyperframes transcribe work/voice.wav --json` or `scripts/reel/transcribe.py`) and retime beats to the actual word timestamps.
 - If Kokoro isn't available, ask the user for a recording or offer `brag-slim.md`. Use ElevenLabs only if the user explicitly asks for it and the key is set.
 
 ## Delivery

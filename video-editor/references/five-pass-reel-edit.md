@@ -10,7 +10,7 @@ Target: 1080×1920, 30 fps, H.264/AAC, −14 LUFS integrated, true peak < −1 d
 scripts/doctor.sh --reel      # fails if faster-whisper, onnxruntime, numpy, OpenCV or the model are missing
 ```
 
-If it fails, follow `environment-setup.md` → broken reel venv. Don't start a reel with a broken environment.
+If it fails, follow `environment-setup.md` → broken reel venv. Don't start a reel with a broken environment. If the venv can't be repaired right now, the Hyperframes equivalents work without Python: `hyperframes transcribe` for pass 1/3 and `hyperframes remove-background` for pass 2 (`hyperframes-cli.md`).
 
 ## Pass 1 — Transcribe and tighten
 
