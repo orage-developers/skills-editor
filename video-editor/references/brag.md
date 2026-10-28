@@ -20,7 +20,7 @@ Ask for whatever is missing:
 | 2–5 s | Reveal | Logo + product name, hero screenshot slides in. |
 | 5–14 s | Features | 3 beats × 3 s: screenshot zoomed to the relevant UI + 3–5-word caption. |
 | 14–17 s | Proof | Metric, testimonial or "Used by…" logos (only real ones). |
-| 17–20 s | CTA | CTA text, URL, logo; hold ≥ 1.5 s. |
+| 17–20 s | CTA | CTA text, URL, logo; hold ≥ 2 s (0.5 s + 0.3 s per word). |
 
 Scale proportionally for 15 s (2 features) or 25 s (4 features or longer proof).
 

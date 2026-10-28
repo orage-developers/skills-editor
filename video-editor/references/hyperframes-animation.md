@@ -8,7 +8,8 @@ Animation rules, scene blueprints, transitions and runtime adapters. GSAP is the
 - **Stagger** text by word (0.04–0.08 s) or line (0.1–0.15 s), never by letter for body text.
 - **Move less than you think:** 40–120 px offsets at 1080 wide. Scale from 0.9–0.96, not from 0.
 - **One focal motion at a time.** Background elements move slower and smaller than the foreground.
-- **Hold** important text for at least 0.25 s per word on screen before it exits.
+- **Hold** important text for at least 0.25 s per word on screen before it exits; the closing line ≥ 2 s.
+- **Frame 0 shows the title.** Don't start the hook with a `from(opacity: 0)` at t=0 — the first frame (the thumbnail on most platforms) comes out empty or half-drawn. Start the title fully visible and animate something secondary (scale 1.04 → 1, accent word, underline), or use `fromTo` with a start state that is already legible.
 - **Ease out of everything that arrives, ease in to everything that leaves.** Avoid `linear` except for continuous drift and progress bars.
 - Animate `transform` and `opacity`. Avoid animating `width`, `height`, `top`, `left` or filters on large elements — they slow rendering.
 - Respect the brand profile's motion style: "snappy" → shorter durations and `back.out(1.4)` accents; "smooth" → longer durations and `sine`/`power2` eases; "minimal" → opacity and small translations only.
@@ -17,7 +18,7 @@ Animation rules, scene blueprints, transitions and runtime adapters. GSAP is the
 
 | Blueprint | Beats |
 | --- | --- |
-| **Hook → value → CTA** (social, 15–30 s) | Hook statement (0–1.2 s) · 3 value beats (2–4 s each) · CTA + logo (≥ 1.5 s hold) |
+| **Hook → value → CTA** (social, 15–30 s) | Hook statement (0–1.2 s) · 3 value beats (2–4 s each) · CTA + logo (≥ 2 s hold) |
 | **Problem → solution** | Pain (big type) · twist · product reveal · 2–3 proof points · CTA |
 | **List / countdown** | Title · N items, same layout per item · recap · CTA |
 | **Stat reveal** | Context line · number counts up · comparison · source line |
@@ -39,10 +40,14 @@ Pick one or two transition types per video and reuse them.
 ## Patterns
 
 ```js
-// Word-by-word title in, then out
+// Hook title: legible on frame 0, settles in, then exits word by word
 const words = gsap.utils.toArray("#title .w");
-tl.from(words, { y: 60, opacity: 0, duration: 0.45, ease: "power3.out", stagger: 0.06 }, BEATS.hook)
+tl.fromTo("#title", { scale: 1.06 }, { scale: 1, duration: 0.6, ease: "power3.out" }, BEATS.hook)
+  .from("#title .accent", { y: 24, duration: 0.4, ease: "back.out(1.6)" }, BEATS.hook)
   .to(words, { y: -40, opacity: 0, duration: 0.25, ease: "power2.in", stagger: 0.03 }, BEATS.problem - 0.3);
+
+// Later titles can enter from nothing
+tl.from("#scene2 .w", { y: 60, opacity: 0, duration: 0.45, ease: "power3.out", stagger: 0.06 }, BEATS.scene2);
 
 // Number count-up with supported properties only: pre-render the steps as spans,
 // then flip visibility with set() — deterministic at any seek position.

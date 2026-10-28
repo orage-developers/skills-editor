@@ -35,4 +35,4 @@ Keep footage, images, fonts and audio inside the project. GSAP loads from the CD
 - Text inside safe areas (see `hyperframes-creative.md`).
 - Brand fonts actually loaded (not a fallback) — check a frame.
 - No element pops in or out without an animation unless it's a deliberate hard cut.
-- Last frame holds long enough to read the CTA (≥ 1.5 s).
+- Last line stays on screen ≥ 2 s (about 0.5 s + 0.3 s per word) — `hyperframes check` flags shorter holds as `line_unread`.

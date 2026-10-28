@@ -22,7 +22,7 @@
 | 14 | **Quote card** | Testimonial, citation | 2.5–4 s | Front | Card with quote marks; text reveals by line; source line last. |
 | 15 | **Screenshot reveal** | "Look at this", product mention | 2–3 s | Front | Device or browser frame slides up; optional zoom to a detail. |
 | 16 | **Highlight underline** | Contrast word in captions | With caption | Captions | Accent bar draws under the active word. |
-| 17 | **CTA end card** | Final call to action | ≥ 1.5 s hold | Front | CTA text + logo + handle; music hits on entry. |
+| 17 | **CTA end card** | Final call to action | ≥ 2 s hold | Front | CTA text + logo + handle; music hits on entry. |
 
 ## Rules
 

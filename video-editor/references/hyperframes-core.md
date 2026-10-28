@@ -7,7 +7,7 @@ Composition structure, timing, clips, tracks and deterministic rendering. Checke
 A composition is an HTML document with a root element carrying `data-composition-id`, `data-width` and `data-height`. Timed elements carry `data-start` / `data-duration` and `class="clip"`. Animation lives in one paused GSAP timeline registered under the composition id.
 
 ```html
-<div id="root" data-composition-id="root" data-width="1080" data-height="1920">
+<div id="root" data-composition-id="main" data-start="0" data-duration="12" data-width="1080" data-height="1920">
 
   <video id="aroll" class="clip" data-start="0" data-duration="12" data-media-start="3.5"
          data-has-audio="true" src="assets/aroll.mp4" playsinline></video>
@@ -25,11 +25,12 @@ A composition is an HTML document with a root element carrying `data-composition
   const tl = gsap.timeline({ paused: true });
   tl.from("#title h1", { y: 80, opacity: 0, duration: 0.5, ease: "power3.out" }, 0);
   window.__timelines = window.__timelines || {};
-  window.__timelines["root"] = tl;
+  window.__timelines["main"] = tl;
+  tl.seek(0);
 </script>
 ```
 
-Scaffold with `hyperframes init <name> --resolution portrait --non-interactive` rather than writing this by hand; the scaffold has the current boilerplate.
+Scaffold with `hyperframes init <name> --resolution portrait --non-interactive --skip-skills` rather than writing this by hand; the scaffold has the current boilerplate (composition id `main`, GSAP pinned on the CDN). `init` also writes an `AGENTS.md` / `CLAUDE.md` with Hyperframes authoring rules inside the project — keep them; they apply when working in that folder.
 
 ## Attributes
 
@@ -37,7 +38,7 @@ Scaffold with `hyperframes init <name> --resolution portrait --non-interactive` 
 | --- | --- |
 | `data-composition-id` | Required on the root; key for `window.__timelines`. |
 | `data-width`, `data-height` | Canvas size in pixels. |
-| `data-start`, `data-duration` | Clip window in seconds on the composition clock. |
+| `data-start`, `data-duration` | Clip window in seconds on the composition clock. On the root, `data-duration` sets the video length. |
 | `data-media-start` | Trim point inside the media file (seconds). |
 | `data-volume` | Gain: 1 = 0 dB, 0 = silent, up to 3.98 (+12 dB). |
 | `data-fade-in`, `data-fade-out` | Linear audio fades at the clip edges (seconds). |
