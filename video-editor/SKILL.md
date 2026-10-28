@@ -9,14 +9,14 @@ One skill, many capabilities. Read this file, then load **only** the references 
 
 ## 0. Gate: run at session start, before any task
 
-Run `scripts/doctor.sh`, then act on its output in this order:
+Run `scripts/workspace.py init` (creates the workspace folders and `memory/index.md` on its own), then `scripts/doctor.sh`, and act on the doctor's output in this order:
 
 | Doctor line | Action |
 | --- | --- |
 | `brand-profile` is `warn` | Load `references/brand-onboarding.md`; ask the first round of brand questions now and save answers to `brand/profile.md`. |
 | `gdrive` or another connection is `warn` | After the brand is saved, load `references/connections-setup.md` and ask the user to complete each missing connection; verify it. |
 | A tool is `FAIL` | Load `references/environment-setup.md`; show `scripts/install.sh --dry-run` and ask before installing. |
-| `memory` is `warn` | Create `memory/index.md` from `templates/memory-index.md` with the results. |
+| `workspace` is `warn` | Run `scripts/workspace.py init`. |
 
 Then read `memory/index.md` and the notes it links.
 
@@ -38,7 +38,8 @@ Then read `memory/index.md` and the notes it links.
 ## 2. Defaults
 
 - Aspect ratio: **9:16** for social, **16:9** for landing pages and long-form YouTube.
-- Job folders: `jobs/<YYYY-MM-DD>-<slug>/{src,work,out}`.
+- Job folders: create them with `scripts/workspace.py job <slug> --title "…"` (→ `jobs/<YYYY-MM-DD>-<slug>/{src,work,out}` + `brief.md`, indexed in memory). Update with `workspace.py status <job> draft|approved|delivered --link …`.
+- Any other lasting folder: `scripts/workspace.py folder <path> "<description>"`. Create scratch folders inside a job freely.
 - Reel export: 1080×1920, 30 fps, H.264 (`yuv420p`) + AAC 48 kHz, −14 LUFS integrated, true peak < −1 dBTP, `-movflags +faststart`.
 - Hook within 1.2 s, title on the first frame, captions, clean word boundaries.
 - Draft first (`work/draft-vN.mp4`), final only after approval (`out/<slug>-final.mp4`).

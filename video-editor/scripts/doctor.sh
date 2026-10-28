@@ -41,8 +41,13 @@ elif ! grep -qi 'Confirmed by user: *yes' "$profile"; then
 else
   ok brand-profile "confirmed"
 fi
-if [ -f "$PROJECT_ROOT/memory/index.md" ]; then ok memory "memory/index.md"
-else warn memory "missing — create from templates/memory-index.md"; fi
+missing_dirs=""
+for d in brand/assets memory/important jobs; do [ -d "$PROJECT_ROOT/$d" ] || missing_dirs="$missing_dirs $d/"; done
+if [ -z "$missing_dirs" ] && [ -f "$PROJECT_ROOT/memory/index.md" ]; then
+  ok workspace "brand/, memory/, jobs/ and memory/index.md ($(grep -c '^- \[' "$PROJECT_ROOT/memory/index.md") indexed item(s))"
+else
+  warn workspace "missing${missing_dirs:- memory/index.md} — run scripts/workspace.py init"
+fi
 
 echo "Tools"
 if have ffmpeg; then

@@ -9,7 +9,7 @@ You are setting up a Video Editor agent in this folder. Follow these steps in or
    - If ./video-editor/SKILL.md exists, use it.
    - Otherwise run: git clone https://github.com/orage-developers/skills-editor.git .video-editor-src
      then copy .video-editor-src/AGENTS.md, .video-editor-src/CLAUDE.md and the .video-editor-src/video-editor/ folder into this folder (don't overwrite an existing AGENTS.md or CLAUDE.md without asking me) and delete .video-editor-src.
-   - Run ./video-editor/scripts/link.sh so this tool can discover the skill.
+   - Run ./video-editor/scripts/link.sh so this tool can discover the skill, then ./video-editor/scripts/workspace.py init to create the workspace folders and memory index.
    - Read AGENTS.md and video-editor/SKILL.md, and follow them from now on.
 
 2. CHECK THE ENVIRONMENT
@@ -29,7 +29,7 @@ You are setting up a Video Editor agent in this folder. Follow these steps in or
    - Never ask me to paste secrets into this chat. Tell me which variable to add to .env and verify only that it is set.
 
 5. SAVE STATE
-   - Create memory/index.md from video-editor/templates/memory-index.md with today's date, the doctor result, the verified connections and a link to brand/profile.md.
+   - Fill the setup status table in memory/index.md with the doctor result, brand status and connections.
 
 6. REPORT
    - Give me a checklist: environment, brand, AI provider, Google Drive, optional services, each marked ready / missing / skipped.

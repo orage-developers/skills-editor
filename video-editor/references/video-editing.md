@@ -4,7 +4,7 @@ General workflow for turning raw footage into an assembled edit. Commands live i
 
 ## 1. Ingest
 
-1. Create `jobs/<YYYY-MM-DD>-<slug>/{src,work,out}`. Copy or download sources into `src/` (Drive: `rclone copy "gdrive:<path>" src/`).
+1. `scripts/workspace.py job <slug> --title "…"` creates `jobs/<YYYY-MM-DD>-<slug>/{src,work,out}` and indexes it. Fill in `brief.md`, then copy or download sources into `src/` (Drive: `rclone copy "gdrive:<path>" src/`).
 2. `ffprobe` every file; log resolution, fps, duration and audio in `work/sources.md`.
 3. Normalize to CFR 30 fps / 48 kHz in `work/norm/` if sources are mixed or VFR.
 4. For long footage, make low-res proxies for review.
@@ -41,7 +41,8 @@ Write the edit as a cut list before touching the timeline, and confirm it with t
 ## 6. Review and deliver
 
 - Draft → `work/draft-vN.mp4` + a preview-size copy for chat. List what changed since the last version.
-- After approval: final export → `out/`, `scripts/qa.sh`, `scripts/deliver.sh`.
+- Mark progress: `scripts/workspace.py status <job> draft` when you send a draft, `approved` on sign-off.
+- After approval: final export → `out/`, `scripts/qa.sh`, `scripts/deliver.sh`, then `scripts/workspace.py status <job> delivered --link <drive-link>`.
 
 ## Generated assets (optional)
 

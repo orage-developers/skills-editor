@@ -6,7 +6,7 @@ Target: 1080×1920, 30 fps, H.264/AAC, −14 LUFS integrated, true peak < −1 d
 
 ## Before pass 1
 
-Run the commands below from `jobs/<job>/`, with `VE` pointing at this skill's folder:
+Create the job with `scripts/workspace.py job <slug> --title "…"`, put the footage in its `src/`, and run the commands below from `jobs/<job>/`, with `VE` pointing at this skill's folder. Create `work/pN` folders as you go. After each approved pass, `workspace.py status <job> "pass N approved"`.
 
 ```bash
 VE=../../video-editor                      # adjust if the skill lives elsewhere

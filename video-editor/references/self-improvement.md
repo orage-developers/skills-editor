@@ -25,7 +25,7 @@ Record mistakes, corrections and better approaches so the next job starts smarte
 - **Applies to:** <reels / brag / all 9:16 / this brand only>
 ```
 
-Link every new note from `memory/index.md` with a one-line summary.
+Create notes with `scripts/workspace.py note <slug> "<one-line summary>" --applies-to "<scope>" --job <job>` — it writes this skeleton to `memory/important/<date>-<slug>.md` and links it from `memory/index.md`; then fill in the TBD fields.
 
 ## Rules
 

@@ -36,7 +36,7 @@ Ask in **rounds of 3–4 questions**. Accept "skip" or "don't know" and move on;
 ## Saving
 
 1. Copy `templates/brand-profile.md` to `brand/profile.md` and fill it in.
-2. Save provided files under `brand/assets/` (`logo-light.svg`, `logo-dark.svg`, `fonts/`, `music/`). Record license notes next to music.
+2. Save provided files under `brand/assets/logo/`, `brand/assets/fonts/` and `brand/assets/music/` (created by `workspace.py init`). Record license notes next to music. For any other asset type, `scripts/workspace.py folder brand/assets/<kind> "<description>"`.
 3. If you sampled colors from an image or site, label them "sampled — confirm".
 4. Read back a 5–8 line summary (name, audience, palette, fonts, caption style, platforms, never-do rules) and ask the user to confirm. Set `Confirmed by user: yes` only after they do.
 5. Add a line to `memory/index.md` under setup status.
