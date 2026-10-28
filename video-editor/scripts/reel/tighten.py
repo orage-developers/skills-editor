@@ -2,7 +2,10 @@
 """Tighten a talking-head take: drop long pauses and filler words, then render the cut.
 
 Plan (writes an editable EDL):
-    tighten.py words.json -o edl.json [--max-gap 0.35] [--pad 0.06] [--fillers "um,uh,o sea"]
+    tighten.py words.json -o edl.json [--max-gap 0.35] [--pad 0.06] [--fillers "um,uh,o sea"] [--noise -35]
+
+Pauses are found two ways: gaps between word timestamps, and silences measured in the source audio with
+ffmpeg silencedetect (Whisper often stretches a word across a pause, hiding the gap).
 
 Render (applies the EDL to the source):
     tighten.py --render SOURCE.mp4 OUT.mp4 --edl edl.json
@@ -13,7 +16,7 @@ EDL format — edit it by hand between the two steps:
      "cut":  [[start, end], ...],   # extra ranges to remove (retakes, false starts)
      "removed": [{"word", "start", "end", "reason"}, ...]}   # for review only
 
-Uses only the standard library; rendering needs ffmpeg on PATH.
+Uses only the standard library; silence detection and rendering need ffmpeg on PATH.
 """
 import argparse
 import json
@@ -45,6 +48,24 @@ def find_fillers(words, fillers):
                 break
         i += 1
     return drop
+
+
+def detect_silences(src, min_len, noise_db):
+    """Return [start, end] silences longer than min_len seconds, or [] if ffmpeg/source is unavailable."""
+    if not (src and Path(src).is_file() and shutil.which("ffmpeg")):
+        print("tighten: skipping silence detection (no ffmpeg or source file)", file=sys.stderr)
+        return []
+    r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", src, "-map", "0:a:0?",
+                        "-af", f"silencedetect=noise={noise_db}dB:d={min_len}", "-f", "null", "-"],
+                       capture_output=True, text=True)
+    silences, start = [], None
+    for line in r.stderr.splitlines():
+        if "silence_start:" in line:
+            start = float(line.split("silence_start:")[1].split()[0])
+        elif "silence_end:" in line and start is not None:
+            silences.append([max(0.0, start), float(line.split("silence_end:")[1].split()[0])])
+            start = None
+    return silences
 
 
 def plan(args):
@@ -84,13 +105,23 @@ def plan(args):
         else:
             padded.append([round(s, 3), round(e, 3)])
 
+    # Remove measured silences, keeping --pad of air on each side.
+    src = args.source or data.get("source", "")
+    silence_cuts = []
+    for s, e in detect_silences(src, args.max_gap, args.noise):
+        if e - s - 2 * args.pad > 0.05:
+            silence_cuts.append([s + args.pad, e - args.pad])
+            removed.append({"word": "", "start": round(s, 3), "end": round(e, 3), "reason": "silence"})
+    padded = [[round(s, 3), round(e, 3)] for s, e in subtract(padded, silence_cuts)]
+
     before = duration
     after = sum(e - s for s, e in padded)
     edl = {"source": data.get("source", ""), "keep": padded, "cut": [], "removed": removed}
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     Path(args.output).write_text(json.dumps(edl, ensure_ascii=False, indent=1))
-    print(f"tighten: {len(padded)} segments, {before:.1f} s → {after:.1f} s, "
-          f"{len(removed)} filler word(s) removed → {args.output}", file=sys.stderr)
+    fillers_n = sum(r["reason"] == "filler" for r in removed)
+    print(f"tighten: {len(padded)} segments, {before:.1f} s → {after:.1f} s, {fillers_n} filler word(s), "
+          f"{len(silence_cuts)} silence(s) removed → {args.output}", file=sys.stderr)
 
 
 def subtract(ranges, cuts):
@@ -142,7 +173,7 @@ def render(args):
     parts.append("".join(labels) + f"concat=n={n}:v=1:a={1 if audio else 0}[v]" + ("[a]" if audio else ""))
     graph = ";".join(parts)
 
-    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-stats", "-y", "-i", src,
+    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostats", "-y", "-i", src,
            "-filter_complex", graph, "-map", "[v]"]
     if audio:
         cmd += ["-map", "[a]", "-c:a", "aac", "-b:a", "192k", "-ar", "48000"]
@@ -160,6 +191,8 @@ def main():
     ap.add_argument("--max-gap", type=float, default=0.35, help="pauses longer than this are cut (s)")
     ap.add_argument("--pad", type=float, default=0.06, help="padding kept around each segment (s)")
     ap.add_argument("--fillers", default=DEFAULT_FILLERS, help=f"comma-separated filler words/phrases (default: {DEFAULT_FILLERS})")
+    ap.add_argument("--noise", type=float, default=-35, help="silence threshold in dB (default: -35)")
+    ap.add_argument("--source", help="audio/video to measure silences in (default: words.json source)")
     ap.add_argument("--render", nargs=2, metavar=("SOURCE", "OUT"), help="render SOURCE through --edl to OUT")
     ap.add_argument("--edl", help="EDL to render")
     args = ap.parse_args()
