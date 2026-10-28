@@ -14,7 +14,7 @@ Open Claude Code, Codex, OpenCode or any agent that can run shell commands, in t
 Install this: https://github.com/orage-developers/skills-editor
 ```
 
-The agent reads [For AI agents](#for-ai-agents-installing-this-repo) below and does the rest. For a step-by-step guided setup, paste [`video-editor/bootstrap-prompt.md`](video-editor/bootstrap-prompt.md) instead.
+The agent installs the skill, sets up the project (`AGENTS.md`, `brand/`, `memory/`, `jobs/`), interviews you about your brand, saves it and asks for any missing connection. Agents whose skill installer only copies the skill (Codex) finish the setup on your next message about video — e.g. *"I want to make a reel for my brand"*. For a step-by-step guided setup, paste [`video-editor/bootstrap-prompt.md`](video-editor/bootstrap-prompt.md) instead.
 
 ### B. Clone this repo and run the scripts
 
