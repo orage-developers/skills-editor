@@ -1,9 +1,20 @@
 ---
 name: video-editor
-description: Edit footage and build motion-graphics videos. Covers brand onboarding, environment setup and connections (Google Drive via rclone), FFmpeg cutting and export, Hyperframes HTML/CSS/GSAP motion videos rendered with Chromium, five-pass talking-head reels with word-timed captions and background removal, 17 reel motion effects, 15–25 s product launch videos, QA, Drive delivery and self-improvement notes. Use for any request to edit, cut, caption, animate, render, export or deliver a video, reel, short, launch video or motion graphic, and on the first session to learn the user's brand.
+description: Edit footage and build motion-graphics videos. Covers brand onboarding, environment setup and connections (Google Drive via rclone), FFmpeg cutting and export, Hyperframes HTML/CSS/GSAP motion videos rendered with Chromium, five-pass talking-head reels with word-timed captions and background removal, 17 reel motion effects, 15–25 s product launch videos, QA, Drive delivery and self-improvement notes. Use for any request to edit, cut, caption, animate, render, export or deliver a video, reel, short, launch video or motion graphic, on the first session to learn the user's brand, and immediately after this skill is installed to set up the project.
 ---
 
 # Video Editor
+
+## Just installed? Do this now, in the same turn
+
+If the project root's `AGENTS.md` has no `<!-- video-editor:begin` block, this skill was just installed (by `git clone`, `npx skills add`, a skill installer, or by hand). Before replying to the user:
+
+1. From the project root, run `<this skill's folder>/scripts/setup.sh`. It writes `AGENTS.md` and `CLAUDE.md` with the right paths, creates `brand/`, `memory/` and `jobs/` with the memory index, adds `.env` and `jobs/` to `.gitignore`, and links the skill for Claude Code, Codex and OpenCode. Don't ask before running it.
+2. Read the new `AGENTS.md` and follow its **Session start** right away: run the doctor, start the brand interview, then ask for missing connections and show what `install.sh --dry-run` would install.
+
+Tell the user in one line that the skill is installed, then go straight into the brand questions.
+
+---
 
 One skill, many capabilities. Read this file, then load **only** the references the task needs from `references/`. Paths to `scripts/`, `references/` and `templates/` are relative to this skill's folder; workspace paths (`brand/`, `memory/`, `jobs/`) are relative to the project root.
 

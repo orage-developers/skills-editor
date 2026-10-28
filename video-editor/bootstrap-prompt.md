@@ -6,11 +6,10 @@ Paste everything inside the block below into Claude Code, Codex, OpenCode or any
 You are setting up a Video Editor agent in this folder. Follow these steps in order, and stop to ask me whenever a step needs my input or approval.
 
 1. GET THE SKILL
-   - If ./video-editor/SKILL.md exists, use it.
-   - Otherwise run: git clone https://github.com/orage-developers/skills-editor.git .video-editor-src
-     then copy .video-editor-src/AGENTS.md, .video-editor-src/CLAUDE.md and the .video-editor-src/video-editor/ folder into this folder (don't overwrite an existing AGENTS.md or CLAUDE.md without asking me) and delete .video-editor-src.
-   - Run ./video-editor/scripts/link.sh so this tool can discover the skill, then ./video-editor/scripts/workspace.py init to create the workspace folders and memory index.
-   - Read AGENTS.md and video-editor/SKILL.md, and follow them from now on.
+   - If a video-editor/SKILL.md is already in this project (or in .agents/skills, .claude/skills, .opencode/skills), use it.
+   - Otherwise install it: npx skills add orage-developers/skills-editor --skill video-editor, or git clone --depth 1 https://github.com/orage-developers/skills-editor.git and copy its video-editor/ folder here.
+   - From this folder, run <skill folder>/scripts/setup.sh. It writes AGENTS.md and CLAUDE.md, creates brand/, memory/ and jobs/ with the memory index, and links the skill for this tool.
+   - Read AGENTS.md and the skill's SKILL.md, and follow them from now on.
 
 2. CHECK THE ENVIRONMENT
    - Run ./video-editor/scripts/doctor.sh and show me a short summary of what is missing.
