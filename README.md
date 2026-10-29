@@ -1,5 +1,9 @@
 # Scout Agents — Video Editor
 
+<video controls width="100%" src="public/videos/example.mp4">
+  <a href="public/videos/example.mp4">Watch the example video</a>
+</video>
+
 A template for creating **video editing and motion graphics agents** that share the same knowledge and skills. Everything ships as a single skill, `video-editor/`, that works in any tool supporting `AGENTS.md` / `SKILL.md`: Claude Code, Codex, OpenCode and similar.
 
 ## Install
